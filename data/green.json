@@ -1,32 +1,12 @@
 [
   {
-    "id": "gc_1781435869873_h6q03",
-    "userId": "user_self",
-    "itemId": "item_01",
-    "action": "buy_refurbished",
-    "credits": 70,
-    "carbonKgSaved": 71.88,
-    "description": "Nike Air Max 270 → Mumbai",
-    "timestamp": "2026-06-14T11:17:49.873Z"
-  },
-  {
-    "id": "gc_1781447425778_s8139",
-    "userId": "user_self",
-    "itemId": "item_01",
-    "action": "buy_refurbished",
-    "credits": 70,
-    "carbonKgSaved": 71.88,
-    "description": "Nike Air Max 270 → Mumbai",
-    "timestamp": "2026-06-14T14:30:25.778Z"
-  },
-  {
-    "id": "gc_1781448515248_33nya",
+    "id": "gc_1781454478691_gret2",
     "userId": "buyer_01",
-    "itemId": "item_01",
+    "itemId": "item_03",
     "action": "buy_refurbished",
     "credits": 70,
     "carbonKgSaved": 0,
-    "description": "Bought Nike Air Max 270 second-life",
-    "timestamp": "2026-06-14T14:48:35.249Z"
+    "description": "Bought Samsung Galaxy S23 second-life",
+    "timestamp": "2026-06-14T16:27:58.691Z"
   }
 ]

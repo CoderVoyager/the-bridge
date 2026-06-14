@@ -48,6 +48,10 @@
       {
         "category": "headphone",
         "maxPrice": 99999
+      },
+      {
+        "category": "shoes",
+        "maxPrice": 99999
       }
     ]
   },

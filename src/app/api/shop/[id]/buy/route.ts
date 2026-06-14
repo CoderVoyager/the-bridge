@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getItemById, getBuyerById, addItem } from '@/lib/store';
+import { getItemById, getBuyerById, addItem, updateItem } from '@/lib/store';
 import { recordSuccessfulDeal, recordDispute, getTrustRecord } from '@/lib/trust';
 import { awardGreenCredits } from '@/lib/green';
 import { distanceKm } from '@/lib/buyer';
@@ -65,6 +65,15 @@ export async function POST(
         : undefined,
     };
     addItem(loopItem);
+
+    // Mark original item as sold
+    updateItem(id, {
+      route: {
+        ...(item.route ?? { path: 'ship_direct', cost: { shipDirect: 0, warehouseAlt: 0, carbonKgSaved: 0 }, reason: '' }),
+        path: 'sold' as never, // mark as sold
+        reason: 'Purchased by buyer.',
+      },
+    });
 
     return NextResponse.json({
       success: true,

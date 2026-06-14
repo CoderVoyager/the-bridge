@@ -36,7 +36,7 @@ export async function POST(
 
     const { grade } = (await gradeRes.json()) as { grade: Grade };
 
-    // 2. Matching
+    // 2. Matching (internal — for demand count only, not shown to seller)
     const matchResult = matchBuyers(item.category, item.location);
 
     // 3. Pricing
@@ -54,23 +54,38 @@ export async function POST(
       riskFlags,
     };
 
-    // 5. Route decision
+    // 5. Route decision (internal logic)
     const route = decideRoute({
       assessment,
       buyerDistanceKm: matchResult.bestBuyerDistanceKm,
     });
 
-    // Save on item
+    // Save on item (assessment + route stored for buyer-side use)
     const updated = updateItem(id, { assessment, route });
+
+    // Determine seller-facing recommendation
+    const isListable = !riskFlags.includes('block_resale') && price >= route.cost.shipDirect;
+    const recommendation = riskFlags.includes('block_resale')
+      ? 'recycle'
+      : !isListable
+      ? 'donate'
+      : 'list';
+
+    // Total interested buyers count (anonymous)
+    const interestedBuyersCount = matchResult.nearbyDemand;
 
     return NextResponse.json({
       success: true,
-      assessment,
-      route,
-      matchedBuyerName: matchResult.bestBuyerName,
-      matchedBuyerCity: matchResult.bestBuyerCity,
-      buyerDistanceKm: matchResult.bestBuyerDistanceKm,
-      item: updated,
+      // Seller-facing data (no buyer identity)
+      grade,
+      price,
+      recommendation,
+      interestedBuyersCount,
+      riskFlags,
+      costComparison: route.cost,
+      carbonKgSaved: route.cost.carbonKgSaved,
+      // Internal (not displayed to seller but needed)
+      routePath: route.path,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';

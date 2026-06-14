@@ -11,32 +11,20 @@ interface GradeData {
   confidence: number;
 }
 
-interface AssessmentData {
+interface AssessmentResponse {
+  success: boolean;
   grade: GradeData;
   price: number;
-  matchedBuyerId?: string;
-  nearbyDemand: number;
+  recommendation: "list" | "donate" | "recycle";
+  interestedBuyersCount: number;
   riskFlags: string[];
-}
-
-interface RouteData {
-  path: string;
-  matchedBuyerId?: string;
-  cost: {
+  costComparison: {
     shipDirect: number;
     warehouseAlt: number;
     carbonKgSaved: number;
   };
-  reason: string;
-}
-
-interface AssessmentResponse {
-  success: boolean;
-  assessment: AssessmentData;
-  route: RouteData;
-  matchedBuyerName?: string;
-  matchedBuyerCity?: string;
-  buyerDistanceKm?: number;
+  carbonKgSaved: number;
+  routePath: string;
   error?: string;
 }
 
@@ -47,16 +35,6 @@ const CONDITION_COLORS: Record<string, string> = {
   damaged: "text-red-400 bg-red-500/10 border-red-500/30",
 };
 
-const PATH_LABELS: Record<string, { label: string; icon: string; color: string; description: string }> = {
-  ship_direct: { label: "Ship Direct", icon: "🚀", color: "text-green-400 bg-green-500/10 border-green-500/30", description: "Matched buyer nearby — fastest route to a second life." },
-  refurbish: { label: "Refurbish", icon: "🔧", color: "text-blue-400 bg-blue-500/10 border-blue-500/30", description: "Item needs some love. After refurbishment, it'll be as good as new." },
-  repair: { label: "Repair", icon: "🛠️", color: "text-orange-400 bg-orange-500/10 border-orange-500/30", description: "A missing or broken part needs fixing before resale." },
-  donate: { label: "Donate", icon: "🎁", color: "text-purple-400 bg-purple-500/10 border-purple-500/30", description: "Resale value is low, but this item can still help someone in need." },
-  recycle: { label: "Recycle", icon: "♻️", color: "text-red-400 bg-red-500/10 border-red-500/30", description: "This item can't be safely resold, but its materials can be recovered." },
-  list_hold: { label: "List & Hold", icon: "📋", color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30", description: "No buyer nearby yet. We'll list it and notify you when someone wants it." },
-};
-
-// Warehouse carbon constant
 const WAREHOUSE_CARBON = 600 * 0.12;
 
 export default function ResultPage() {
@@ -67,8 +45,8 @@ export default function ResultPage() {
   const [error, setError] = useState<string | null>(null);
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [data, setData] = useState<AssessmentResponse | null>(null);
-  const [confirming, setConfirming] = useState(false);
-  const [quickMode, setQuickMode] = useState(false);
+  const [listing, setListing] = useState(false);
+  const [listed, setListed] = useState(false);
 
   const runAssessment = useCallback(async () => {
     setLoading(true);
@@ -80,66 +58,42 @@ export default function ResultPage() {
       if (!res.ok) {
         const errMsg = json.error || "Assessment failed";
         setError(errMsg);
-        // Friendly hints for common issues
-        if (errMsg.includes("API_KEY") || errMsg.includes("api key") || errMsg.includes("GEMINI")) {
-          setErrorHint("The Gemini API key may be missing or invalid. Check your .env file has GEMINI_API_KEY set.");
+        if (errMsg.includes("API_KEY") || errMsg.includes("GEMINI")) {
+          setErrorHint("The Gemini API key may be missing or invalid. Check your .env file.");
         } else if (errMsg.includes("photos")) {
-          setErrorHint("Go back and capture photos first — the AI needs images to grade your item.");
-        } else if (errMsg.includes("fetch") || errMsg.includes("network") || errMsg.includes("ECONNREFUSED")) {
-          setErrorHint("Couldn't reach the grading service. Check your internet connection and try again.");
+          setErrorHint("Go back and capture photos first.");
         }
       } else {
         setData(json);
       }
     } catch {
       setError("Network error. Please try again.");
-      setErrorHint("Check your connection — the grading API couldn't be reached.");
     } finally {
       setLoading(false);
     }
   }, [id]);
 
-  const handleConfirm = useCallback(async () => {
-    setConfirming(true);
+  const handleList = useCallback(async () => {
+    setListing(true);
     try {
-      const res = await fetch(`/api/items/${id}/confirm`, { method: "POST" });
+      const res = await fetch(`/api/items/${id}/list`, { method: "POST" });
       if (res.ok) {
-        router.push(`/item/${id}/confirm`);
+        setListed(true);
       } else {
-        setError("Failed to confirm route.");
-        setConfirming(false);
-      }
-    } catch {
-      setError("Network error on confirm.");
-      setConfirming(false);
-    }
-  }, [id, router]);
-
-  // "Just take it away" — confirm immediately without further questions
-  const handleQuickConfirm = useCallback(async () => {
-    setQuickMode(true);
-    setConfirming(true);
-    try {
-      const res = await fetch(`/api/items/${id}/confirm`, { method: "POST" });
-      if (res.ok) {
-        router.push(`/item/${id}/confirm`);
-      } else {
-        setError("Failed to confirm.");
-        setConfirming(false);
-        setQuickMode(false);
+        setError("Failed to list item.");
       }
     } catch {
       setError("Network error.");
-      setConfirming(false);
-      setQuickMode(false);
+    } finally {
+      setListing(false);
     }
-  }, [id, router]);
+  }, [id]);
 
   useEffect(() => {
     runAssessment();
   }, [runAssessment]);
 
-  // --- Loading state ---
+  // --- Loading ---
   if (loading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
@@ -147,17 +101,17 @@ export default function ResultPage() {
           <div className="mb-4 text-5xl animate-bounce">🤖</div>
           <h1 className="text-xl font-bold">Analyzing your item…</h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
-            AI is inspecting photos, grading condition, computing a fair price, and finding the best route.
+            AI is inspecting photos, grading condition, and computing a fair price.
           </p>
           <div className="mt-5 space-y-2">
             <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
               <span className="animate-pulse text-amber-400">●</span> Grading with Gemini Vision…
             </div>
             <div className="flex items-center gap-2 text-xs text-neutral-600">
-              <span>○</span> Computing price & matching buyers
+              <span>○</span> Computing resale price
             </div>
             <div className="flex items-center gap-2 text-xs text-neutral-600">
-              <span>○</span> Choosing optimal route
+              <span>○</span> Checking buyer demand
             </div>
           </div>
           <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
@@ -168,7 +122,7 @@ export default function ResultPage() {
     );
   }
 
-  // --- Error state ---
+  // --- Error ---
   if (error && !data) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
@@ -177,27 +131,16 @@ export default function ResultPage() {
           <h1 className="text-xl font-bold text-red-400">Assessment Failed</h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">{error}</p>
           {errorHint && (
-            <p className="mt-2 rounded-lg bg-neutral-800 p-2 text-xs text-amber-400">
-              💡 {errorHint}
-            </p>
+            <p className="mt-2 rounded-lg bg-neutral-800 p-2 text-xs text-amber-400">💡 {errorHint}</p>
           )}
           <div className="mt-5 flex gap-3 justify-center">
-            <button
-              onClick={runAssessment}
-              className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400"
-            >
+            <button onClick={runAssessment} className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400">
               🔄 Retry
             </button>
-            <Link
-              href={`/item/${id}/capture`}
-              className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            >
-              📷 Retake Photos
+            <Link href={`/item/${id}/capture`} className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)]">
+              📷 Retake
             </Link>
-            <Link
-              href="/"
-              className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            >
+            <Link href="/" className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)]">
               ← Home
             </Link>
           </div>
@@ -206,117 +149,89 @@ export default function ResultPage() {
     );
   }
 
-  // --- Success state ---
-  const { assessment, route, matchedBuyerName, matchedBuyerCity } = data!;
-  const { grade, price, nearbyDemand, riskFlags } = assessment;
-  const conditionStyle = CONDITION_COLORS[grade.condition] || "";
-  const pathInfo = PATH_LABELS[route.path] || { label: route.path, icon: "📦", color: "", description: "" };
+  // --- Listed success ---
+  if (listed) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
+        <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-10 max-w-md">
+          <div className="text-5xl mb-3">🎉</div>
+          <h1 className="text-xl font-bold text-green-400">Listed on Marketplace!</h1>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            Your item is now live. Buyers can find it, and you&apos;ll see interest signals on your dashboard.
+          </p>
+          <div className="mt-5 flex gap-3 justify-center">
+            <Link href="/seller/dashboard" className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400">
+              📊 View Dashboard
+            </Link>
+            <Link href="/" className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+              ← Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const moneySaved = route.cost.warehouseAlt - route.cost.shipDirect;
-  const carbonSaved = route.cost.carbonKgSaved;
-  const showComparison = route.path !== "recycle"; // recycle doesn't have a meaningful cost comparison
+  // --- Success: Assessment result ---
+  const { grade, price, recommendation, interestedBuyersCount, riskFlags, costComparison, carbonKgSaved } = data!;
+  const conditionStyle = CONDITION_COLORS[grade.condition] || "";
+  const moneySaved = costComparison.warehouseAlt - costComparison.shipDirect;
 
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Assessment & Route</h1>
-        <Link
-          href="/"
-          className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-        >
-          ← Back
-        </Link>
+        <h1 className="text-2xl font-bold">AI Assessment</h1>
+        <Link href="/" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">← Home</Link>
       </div>
 
       <div className="space-y-4">
 
-        {/* ============================================ */}
-        {/* COMPARISON CARD — MOST PROMINENT ELEMENT     */}
-        {/* ============================================ */}
-        {showComparison && (
+        {/* ===== COST COMPARISON — most prominent ===== */}
+        {recommendation === "list" && (
           <div className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent p-6 shadow-lg shadow-amber-500/5">
             <h2 className="mb-1 text-center text-lg font-bold text-amber-400">
-              💰 Why The Bridge is better
+              💰 Why list on The Bridge?
             </h2>
             <p className="mb-5 text-center text-xs text-[var(--text-secondary)]">
-              Side-by-side: our route vs. the traditional warehouse path
+              vs. returning to warehouse (traditional route)
             </p>
             <div className="grid grid-cols-2 gap-4">
-              {/* Our route column */}
               <div className="rounded-xl border-2 border-green-500/40 bg-green-500/5 p-5 text-center relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 bg-green-500 py-0.5 text-[10px] font-bold text-neutral-900 uppercase tracking-wider">
                   The Bridge
                 </div>
-                <div className="mt-4 mb-2 text-xs font-semibold uppercase tracking-wider text-green-400">
-                  {pathInfo.icon} {pathInfo.label}
+                <div className="mt-4 text-3xl font-black text-green-400">
+                  ₹{costComparison.shipDirect.toLocaleString("en-IN")}
                 </div>
-                <div className="text-3xl font-black text-green-400">
-                  ₹{route.cost.shipDirect.toLocaleString("en-IN")}
-                </div>
-                <div className="mt-3 rounded-lg bg-green-500/10 p-2">
-                  <p className="text-[11px] text-[var(--text-secondary)]">Carbon footprint</p>
-                  <p className="text-sm font-bold text-green-300">
-                    {Math.max(0, WAREHOUSE_CARBON - carbonSaved).toFixed(1)} kg CO₂
-                  </p>
+                <div className="mt-2 text-xs text-[var(--text-secondary)]">shipping cost</div>
+                <div className="mt-2 rounded-lg bg-green-500/10 p-1.5">
+                  <p className="text-xs font-bold text-green-300">{Math.max(0, WAREHOUSE_CARBON - carbonKgSaved).toFixed(1)} kg CO₂</p>
                 </div>
               </div>
-
-              {/* Warehouse column */}
               <div className="rounded-xl border border-neutral-700 bg-neutral-800/60 p-5 text-center relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 bg-neutral-700 py-0.5 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                  Traditional
+                  Warehouse Return
                 </div>
-                <div className="mt-4 mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  🏭 Warehouse
+                <div className="mt-4 text-3xl font-black text-[var(--text-secondary)]">
+                  ₹{costComparison.warehouseAlt.toLocaleString("en-IN")}
                 </div>
-                <div className="text-3xl font-black text-[var(--text-secondary)]">
-                  ₹{route.cost.warehouseAlt.toLocaleString("en-IN")}
-                </div>
-                <div className="mt-3 rounded-lg bg-neutral-800 p-2">
-                  <p className="text-[11px] text-[var(--text-secondary)]">Carbon footprint</p>
-                  <p className="text-sm font-bold text-neutral-400">
-                    {WAREHOUSE_CARBON.toFixed(1)} kg CO₂
-                  </p>
+                <div className="mt-2 text-xs text-[var(--text-secondary)]">shipping cost</div>
+                <div className="mt-2 rounded-lg bg-neutral-800 p-1.5">
+                  <p className="text-xs font-bold text-neutral-400">{WAREHOUSE_CARBON.toFixed(1)} kg CO₂</p>
                 </div>
               </div>
             </div>
-
-            {/* Savings highlight — the punchline */}
             {moneySaved > 0 && (
-              <div className="mt-5 rounded-xl border-2 border-amber-400/40 bg-amber-500/15 p-4 text-center">
-                <p className="text-xl font-black text-amber-400">
-                  Save ₹{moneySaved.toLocaleString("en-IN")} + {carbonSaved.toFixed(1)} kg CO₂
-                </p>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                  by skipping the warehouse entirely
-                </p>
-              </div>
-            )}
-            {moneySaved <= 0 && carbonSaved > 0 && (
-              <div className="mt-5 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-center">
-                <p className="text-lg font-bold text-green-400">
-                  🌍 {carbonSaved.toFixed(1)} kg CO₂ saved
-                </p>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                  This item gets a second life with less environmental impact
+              <div className="mt-4 rounded-xl border-2 border-amber-400/40 bg-amber-500/15 p-3 text-center">
+                <p className="text-lg font-black text-amber-400">
+                  Save ₹{moneySaved.toLocaleString("en-IN")} + {carbonKgSaved.toFixed(1)} kg CO₂
                 </p>
               </div>
             )}
           </div>
         )}
 
-        {/* Route Decision Badge (for paths without comparison) */}
-        <div className="rounded-2xl border border-neutral-800 bg-[var(--bg-card)] p-5">
-          <div className="flex items-center gap-3">
-            <span className={`rounded-full border px-4 py-1.5 text-sm font-bold ${pathInfo.color}`}>
-              {pathInfo.icon} {pathInfo.label}
-            </span>
-          </div>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">{pathInfo.description}</p>
-          <p className="mt-1 text-xs text-neutral-500 italic">{route.reason}</p>
-        </div>
-
-        {/* Grade Card */}
+        {/* AI Grade */}
         <div className="rounded-2xl border border-neutral-800 bg-[var(--bg-card)] p-5">
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-[var(--text-secondary)]">
             AI Grade
@@ -335,35 +250,27 @@ export default function ResultPage() {
               <p className="text-xs font-medium text-[var(--text-secondary)]">Defects:</p>
               <ul className="mt-1 flex flex-wrap gap-2">
                 {grade.defects.map((d, i) => (
-                  <li key={i} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs text-[var(--text-secondary)]">
-                    {d}
-                  </li>
+                  <li key={i} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs text-[var(--text-secondary)]">{d}</li>
                 ))}
               </ul>
             </div>
           )}
         </div>
 
-        {/* Price + Buyer row */}
+        {/* Price + Demand */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-2xl border border-neutral-800 bg-[var(--bg-card)] p-5">
-            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-1">Resale Price</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-1">Suggested Price</p>
             <p className="text-2xl font-bold text-amber-400">₹{price.toLocaleString("en-IN")}</p>
           </div>
           <div className="rounded-2xl border border-neutral-800 bg-[var(--bg-card)] p-5">
-            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-1">Buyer</p>
-            {matchedBuyerName ? (
-              <>
-                <p className="text-sm font-semibold">{matchedBuyerName}</p>
-                <p className="text-xs text-[var(--text-secondary)]">{matchedBuyerCity} • {nearbyDemand} interested</p>
-              </>
-            ) : (
-              <p className="text-sm text-[var(--text-secondary)]">No match yet</p>
-            )}
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-1">Buyer Demand</p>
+            <p className="text-2xl font-bold text-green-400">{interestedBuyersCount}</p>
+            <p className="text-[10px] text-[var(--text-secondary)]">buyer{interestedBuyersCount !== 1 ? "s" : ""} nearby want this</p>
           </div>
         </div>
 
-        {/* Risk Flags (compact) */}
+        {/* Risk Flags */}
         {riskFlags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {riskFlags.map((flag, i) => (
@@ -374,27 +281,58 @@ export default function ResultPage() {
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action Buttons */}
         <div className="space-y-3 pt-2">
-          {/* "Just take it away" — one-tap decision-fatigue mode */}
-          <button
-            onClick={handleQuickConfirm}
-            disabled={confirming}
-            className="w-full rounded-xl bg-amber-500 px-6 py-4 text-base font-black text-neutral-900 transition-all hover:bg-amber-400 hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
-          >
-            {confirming && quickMode
-              ? "Taking it away…"
-              : `⚡ Just take it away — ${pathInfo.label}`}
-          </button>
+          {recommendation === "list" && (
+            <button
+              onClick={handleList}
+              disabled={listing}
+              className="w-full rounded-xl bg-amber-500 px-6 py-4 text-base font-black text-neutral-900 transition-all hover:bg-amber-400 hover:scale-[1.01] disabled:opacity-50"
+            >
+              {listing ? "Listing…" : "🛒 List on Marketplace"}
+            </button>
+          )}
+          {recommendation === "donate" && (
+            <>
+              <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-center">
+                <p className="text-sm text-purple-400 font-medium">
+                  🎁 This item&apos;s resale value is lower than shipping cost. We recommend donating it.
+                </p>
+              </div>
+              <button
+                onClick={handleList}
+                disabled={listing}
+                className="w-full rounded-xl bg-purple-500 px-6 py-4 text-base font-bold text-white transition-colors hover:bg-purple-400 disabled:opacity-50"
+              >
+                {listing ? "Processing…" : "🎁 Donate This Item"}
+              </button>
+            </>
+          )}
+          {recommendation === "recycle" && (
+            <>
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center">
+                <p className="text-sm text-red-400 font-medium">
+                  ♻️ This item is flagged as recalled/hazardous and cannot be resold. Recycle responsibly.
+                </p>
+              </div>
+              <button
+                onClick={() => router.push("/")}
+                className="w-full rounded-xl bg-red-500/20 border border-red-500/30 px-6 py-4 text-base font-bold text-red-400 transition-colors hover:bg-red-500/30"
+              >
+                ♻️ Schedule Recycling Pickup
+              </button>
+            </>
+          )}
 
-          {/* Detailed confirm */}
-          <button
-            onClick={handleConfirm}
-            disabled={confirming}
-            className="w-full rounded-xl border border-neutral-700 px-6 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-amber-500/30 hover:text-[var(--text-primary)] disabled:opacity-50"
-          >
-            {confirming && !quickMode ? "Confirming…" : "Review escrow details first →"}
-          </button>
+          {/* Secondary action: go home */}
+          {recommendation !== "recycle" && (
+            <Link
+              href="/"
+              className="block w-full text-center rounded-xl border border-neutral-700 px-6 py-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
+              ← Back to My Items
+            </Link>
+          )}
         </div>
       </div>
     </div>

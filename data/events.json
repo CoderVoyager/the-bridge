@@ -1,12 +1,12 @@
 [
   {
     "type": "view",
-    "itemId": "item_01",
+    "itemId": "item_03",
     "buyerCity": "Delhi",
     "distanceKm": 1148,
     "buyerId": "buyer_01",
     "sellerId": "user_self",
-    "id": "evt_1781448434199_shab",
-    "timestamp": "2026-06-14T14:47:14.199Z"
+    "id": "evt_1781454437513_ggna",
+    "timestamp": "2026-06-14T16:27:17.513Z"
   }
 ]

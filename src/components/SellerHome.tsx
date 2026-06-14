@@ -115,6 +115,7 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
           const fastDep = isFastDepreciating(item.category);
           const monthlyDrop = monthlyValueDrop(item.originalPrice, item.category);
           const isListed = !!item.route && (item.route.path === "ship_direct" || item.route.path === "list_hold");
+          const isSold = !!item.route && (item.route.path as string) === "sold";
           const hasPhotos = item.photos.length > 0;
 
           return (
@@ -136,6 +137,11 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
                   {isListed && (
                     <span className="rounded-full bg-green-500/10 border border-green-500/30 px-2 py-0.5 text-[10px] font-medium text-green-400">
                       Live
+                    </span>
+                  )}
+                  {isSold && (
+                    <span className="rounded-full bg-blue-500/10 border border-blue-500/30 px-2 py-0.5 text-[10px] font-medium text-blue-400">
+                      Sold ✓
                     </span>
                   )}
                 </div>
@@ -182,7 +188,11 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
               </div>
 
               {/* Action button */}
-              {isListed ? (
+              {isSold ? (
+                <div className="mt-4 rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-center text-sm font-medium text-blue-400">
+                  🎉 Sold — funds received
+                </div>
+              ) : isListed ? (
                 <div className="mt-4 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-center text-sm font-medium text-green-400">
                   ✓ Listed on marketplace
                 </div>
@@ -200,29 +210,6 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
         })}
       </div>
 
-      {/* Re-enrolled items from buyers (the loop demo) */}
-      {allItems.filter((i) => i.ownerId !== "user_self" && !allItems.some((s) => s.id === i.id && sellerItems.includes(s))).length > 0 && isDefaultUser && (
-        <div className="mt-12">
-          <h2 className="text-xl font-bold mb-2">♻️ Re-enrolled Items (Buyer Loop)</h2>
-          <p className="text-sm text-[var(--text-secondary)] mb-4">
-            Items that completed a second-life cycle and are pre-enrolled for new owners.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {allItems
-              .filter((i) => i.ownerId !== "user_self" && !sellerItems.some((s) => s.id === i.id))
-              .slice(0, 6)
-              .map((item) => (
-                <div key={item.id} className="rounded-2xl border border-green-500/20 bg-green-500/5 p-4">
-                  <span className="rounded-full bg-green-500/10 border border-green-500/30 px-2 py-0.5 text-[10px] font-bold text-green-400">
-                    ♻️ Pre-enrolled
-                  </span>
-                  <h3 className="mt-2 text-sm font-semibold">{item.title}</h3>
-                  <p className="text-xs text-[var(--text-secondary)]">{item.brand} • Owner: {item.ownerId}</p>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
     </>
   );
 }
