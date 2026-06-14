@@ -81,6 +81,8 @@ export async function POST() {
   fs.writeFileSync(path.join(DATA_DIR, 'green.json'), '[]', 'utf-8');
   // Reset ledger
   fs.writeFileSync(path.join(DATA_DIR, 'ledger.json'), '[]', 'utf-8');
+  // Reset events
+  fs.writeFileSync(path.join(DATA_DIR, 'events.json'), '[]', 'utf-8');
 
   return NextResponse.json({ success: true, message: 'Demo reset complete. All data restored to seed state.' });
 }

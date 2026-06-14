@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Item, Buyer, LedgerEntry } from './types';
+import { Item, Buyer, LedgerEntry, Seller } from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 
@@ -35,6 +35,12 @@ export function updateItem(id: string, updates: Partial<Item>): Item | undefined
   return items[index];
 }
 
+export function addItem(item: Item): void {
+  const items = getItems();
+  items.push(item);
+  writeJSON('items.json', items);
+}
+
 // --- Buyers ---
 
 export function getBuyers(): Buyer[] {
@@ -56,4 +62,15 @@ export function addLedgerEntry(entry: LedgerEntry): void {
   const ledger = getLedger();
   ledger.push(entry);
   writeJSON('ledger.json', ledger);
+}
+
+// --- Sellers ---
+
+export function getSellers(): Seller[] {
+  return readJSON<Seller[]>('sellers.json');
+}
+
+export function getSellerById(id: string): Seller | undefined {
+  const sellers = getSellers();
+  return sellers.find((s) => s.id === id);
 }

@@ -2,106 +2,733 @@
   {
     "id": "buyer_01",
     "name": "Aarav Sharma",
-    "location": { "lat": 28.6139, "lng": 77.209, "city": "Delhi" },
-    "wishlist": ["electronics", "footwear"],
-    "trustScore": 92
+    "location": {
+      "lat": 28.6139,
+      "lng": 77.209,
+      "city": "Delhi"
+    },
+    "wishlist": [
+      "electronics",
+      "footwear"
+    ],
+    "trustScore": 92,
+    "purchaseHistory": [
+      {
+        "category": "electronics",
+        "brand": "Samsung"
+      },
+      {
+        "category": "electronics",
+        "brand": "Apple"
+      },
+      {
+        "category": "footwear",
+        "brand": "Nike"
+      }
+    ],
+    "recentlyViewed": [
+      "electronics",
+      "footwear",
+      "kitchen_appliances"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 9",
+      "clothingSize": "L"
+    },
+    "priceSensitivity": "mid",
+    "notifyList": [
+      {
+        "category": "electronics",
+        "maxPrice": 40000
+      },
+      {
+        "category": "footwear",
+        "maxPrice": 8000
+      },
+      {
+        "category": "headphone",
+        "maxPrice": 99999
+      }
+    ]
   },
   {
     "id": "buyer_02",
     "name": "Priya Nair",
-    "location": { "lat": 19.076, "lng": 72.8777, "city": "Mumbai" },
-    "wishlist": ["baby_gear", "kitchen_appliances"],
-    "trustScore": 88
+    "location": {
+      "lat": 19.076,
+      "lng": 72.8777,
+      "city": "Mumbai"
+    },
+    "wishlist": [
+      "baby_gear",
+      "kitchen_appliances"
+    ],
+    "trustScore": 88,
+    "purchaseHistory": [
+      {
+        "category": "baby_gear",
+        "brand": "Philips"
+      },
+      {
+        "category": "kitchen_appliances",
+        "brand": "Prestige"
+      },
+      {
+        "category": "baby_gear",
+        "brand": "Chicco"
+      }
+    ],
+    "recentlyViewed": [
+      "baby_gear",
+      "kitchen_appliances",
+      "electronics"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 6",
+      "clothingSize": "M"
+    },
+    "priceSensitivity": "deal",
+    "notifyList": [
+      {
+        "category": "baby_gear",
+        "maxPrice": 50000
+      },
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 3000
+      },
+      {
+        "category": "electronics",
+        "maxPrice": 50000
+      }
+    ]
   },
   {
     "id": "buyer_03",
     "name": "Rohan Patel",
-    "location": { "lat": 12.9716, "lng": 77.5946, "city": "Bangalore" },
-    "wishlist": ["electronics", "winter_wear"],
-    "trustScore": 95
+    "location": {
+      "lat": 12.9716,
+      "lng": 77.5946,
+      "city": "Bangalore"
+    },
+    "wishlist": [
+      "electronics",
+      "winter_wear"
+    ],
+    "trustScore": 95,
+    "purchaseHistory": [
+      {
+        "category": "electronics",
+        "brand": "Samsung"
+      },
+      {
+        "category": "electronics",
+        "brand": "Sony"
+      },
+      {
+        "category": "winter_wear",
+        "brand": "Woodland"
+      }
+    ],
+    "recentlyViewed": [
+      "electronics",
+      "winter_wear",
+      "footwear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 10",
+      "clothingSize": "XL"
+    },
+    "priceSensitivity": "premium",
+    "notifyList": [
+      {
+        "category": "electronics",
+        "maxPrice": 60000
+      },
+      {
+        "category": "winter_wear",
+        "maxPrice": 5000
+      }
+    ]
   },
   {
     "id": "buyer_04",
     "name": "Sneha Gupta",
-    "location": { "lat": 28.6353, "lng": 77.225, "city": "Delhi" },
-    "wishlist": ["footwear", "kitchen_appliances"],
-    "trustScore": 78
+    "location": {
+      "lat": 28.6353,
+      "lng": 77.225,
+      "city": "Delhi"
+    },
+    "wishlist": [
+      "footwear",
+      "kitchen_appliances"
+    ],
+    "trustScore": 78,
+    "purchaseHistory": [
+      {
+        "category": "footwear",
+        "brand": "Adidas"
+      },
+      {
+        "category": "kitchen_appliances",
+        "brand": "Bajaj"
+      },
+      {
+        "category": "footwear",
+        "brand": "Puma"
+      }
+    ],
+    "recentlyViewed": [
+      "footwear",
+      "kitchen_appliances",
+      "baby_gear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 5",
+      "clothingSize": "S"
+    },
+    "priceSensitivity": "deal",
+    "notifyList": [
+      {
+        "category": "footwear",
+        "maxPrice": 5000
+      },
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 2500
+      }
+    ]
   },
   {
     "id": "buyer_05",
     "name": "Kiran Desai",
-    "location": { "lat": 19.0861, "lng": 72.8686, "city": "Mumbai" },
-    "wishlist": ["baby_gear", "electronics"],
-    "trustScore": 85
+    "location": {
+      "lat": 19.0861,
+      "lng": 72.8686,
+      "city": "Mumbai"
+    },
+    "wishlist": [
+      "baby_gear",
+      "electronics"
+    ],
+    "trustScore": 85,
+    "purchaseHistory": [
+      {
+        "category": "baby_gear",
+        "brand": "Fisher-Price"
+      },
+      {
+        "category": "electronics",
+        "brand": "OnePlus"
+      },
+      {
+        "category": "baby_gear",
+        "brand": "Philips"
+      }
+    ],
+    "recentlyViewed": [
+      "baby_gear",
+      "electronics",
+      "winter_wear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 7",
+      "clothingSize": "M"
+    },
+    "priceSensitivity": "mid",
+    "notifyList": [
+      {
+        "category": "baby_gear",
+        "maxPrice": 6000
+      },
+      {
+        "category": "electronics",
+        "maxPrice": 35000
+      }
+    ]
   },
   {
     "id": "buyer_06",
     "name": "Arjun Mehta",
-    "location": { "lat": 12.9352, "lng": 77.6245, "city": "Bangalore" },
-    "wishlist": ["footwear", "winter_wear"],
-    "trustScore": 91
+    "location": {
+      "lat": 12.9352,
+      "lng": 77.6245,
+      "city": "Bangalore"
+    },
+    "wishlist": [
+      "footwear",
+      "winter_wear"
+    ],
+    "trustScore": 91,
+    "purchaseHistory": [
+      {
+        "category": "footwear",
+        "brand": "Nike"
+      },
+      {
+        "category": "winter_wear",
+        "brand": "North Face"
+      },
+      {
+        "category": "footwear",
+        "brand": "Woodland"
+      }
+    ],
+    "recentlyViewed": [
+      "footwear",
+      "winter_wear",
+      "electronics"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 9",
+      "clothingSize": "L"
+    },
+    "priceSensitivity": "premium",
+    "notifyList": [
+      {
+        "category": "footwear",
+        "maxPrice": 10000
+      },
+      {
+        "category": "winter_wear",
+        "maxPrice": 6000
+      }
+    ]
   },
   {
     "id": "buyer_07",
     "name": "Meera Iyer",
-    "location": { "lat": 28.5506, "lng": 77.2689, "city": "Delhi" },
-    "wishlist": ["kitchen_appliances", "baby_gear"],
-    "trustScore": 73
+    "location": {
+      "lat": 28.5506,
+      "lng": 77.2689,
+      "city": "Delhi"
+    },
+    "wishlist": [
+      "kitchen_appliances",
+      "baby_gear"
+    ],
+    "trustScore": 73,
+    "purchaseHistory": [
+      {
+        "category": "kitchen_appliances",
+        "brand": "Prestige"
+      },
+      {
+        "category": "baby_gear",
+        "brand": "LuvLap"
+      },
+      {
+        "category": "kitchen_appliances",
+        "brand": "Bosch"
+      }
+    ],
+    "recentlyViewed": [
+      "kitchen_appliances",
+      "baby_gear",
+      "footwear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 5",
+      "clothingSize": "M"
+    },
+    "priceSensitivity": "deal",
+    "notifyList": [
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 3500
+      },
+      {
+        "category": "baby_gear",
+        "maxPrice": 4000
+      }
+    ]
   },
   {
     "id": "buyer_08",
     "name": "Vikram Singh",
-    "location": { "lat": 19.0596, "lng": 72.8295, "city": "Mumbai" },
-    "wishlist": ["electronics", "footwear"],
-    "trustScore": 89
+    "location": {
+      "lat": 19.0596,
+      "lng": 72.8295,
+      "city": "Mumbai"
+    },
+    "wishlist": [
+      "electronics",
+      "footwear"
+    ],
+    "trustScore": 89,
+    "purchaseHistory": [
+      {
+        "category": "electronics",
+        "brand": "Apple"
+      },
+      {
+        "category": "footwear",
+        "brand": "Adidas"
+      },
+      {
+        "category": "electronics",
+        "brand": "Samsung"
+      }
+    ],
+    "recentlyViewed": [
+      "electronics",
+      "footwear",
+      "kitchen_appliances"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 10",
+      "clothingSize": "XL"
+    },
+    "priceSensitivity": "mid",
+    "notifyList": [
+      {
+        "category": "electronics",
+        "maxPrice": 50000
+      },
+      {
+        "category": "footwear",
+        "maxPrice": 9000
+      },
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 50000
+      }
+    ]
   },
   {
     "id": "buyer_09",
     "name": "Ananya Reddy",
-    "location": { "lat": 12.9611, "lng": 77.6387, "city": "Bangalore" },
-    "wishlist": ["baby_gear", "kitchen_appliances"],
-    "trustScore": 94
+    "location": {
+      "lat": 12.9611,
+      "lng": 77.6387,
+      "city": "Bangalore"
+    },
+    "wishlist": [
+      "baby_gear",
+      "kitchen_appliances"
+    ],
+    "trustScore": 94,
+    "purchaseHistory": [
+      {
+        "category": "baby_gear",
+        "brand": "Chicco"
+      },
+      {
+        "category": "kitchen_appliances",
+        "brand": "Morphy Richards"
+      },
+      {
+        "category": "baby_gear",
+        "brand": "Philips"
+      }
+    ],
+    "recentlyViewed": [
+      "baby_gear",
+      "kitchen_appliances",
+      "electronics"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 6",
+      "clothingSize": "S"
+    },
+    "priceSensitivity": "mid",
+    "notifyList": [
+      {
+        "category": "baby_gear",
+        "maxPrice": 5500
+      },
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 4000
+      }
+    ]
   },
   {
     "id": "buyer_10",
     "name": "Rahul Joshi",
-    "location": { "lat": 28.6292, "lng": 77.2181, "city": "Delhi" },
-    "wishlist": ["winter_wear", "electronics"],
-    "trustScore": 82
+    "location": {
+      "lat": 28.6292,
+      "lng": 77.2181,
+      "city": "Delhi"
+    },
+    "wishlist": [
+      "winter_wear",
+      "electronics"
+    ],
+    "trustScore": 82,
+    "purchaseHistory": [
+      {
+        "category": "winter_wear",
+        "brand": "Woodland"
+      },
+      {
+        "category": "electronics",
+        "brand": "Xiaomi"
+      },
+      {
+        "category": "winter_wear",
+        "brand": "Decathlon"
+      }
+    ],
+    "recentlyViewed": [
+      "winter_wear",
+      "electronics",
+      "footwear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 8",
+      "clothingSize": "L"
+    },
+    "priceSensitivity": "deal",
+    "notifyList": [
+      {
+        "category": "winter_wear",
+        "maxPrice": 4000
+      },
+      {
+        "category": "electronics",
+        "maxPrice": 30000
+      }
+    ]
   },
   {
     "id": "buyer_11",
     "name": "Divya Kapoor",
-    "location": { "lat": 19.0728, "lng": 72.8826, "city": "Mumbai" },
-    "wishlist": ["footwear", "baby_gear"],
-    "trustScore": 76
+    "location": {
+      "lat": 19.0728,
+      "lng": 72.8826,
+      "city": "Mumbai"
+    },
+    "wishlist": [
+      "footwear",
+      "baby_gear"
+    ],
+    "trustScore": 76,
+    "purchaseHistory": [
+      {
+        "category": "footwear",
+        "brand": "Skechers"
+      },
+      {
+        "category": "baby_gear",
+        "brand": "Fisher-Price"
+      },
+      {
+        "category": "footwear",
+        "brand": "Nike"
+      }
+    ],
+    "recentlyViewed": [
+      "footwear",
+      "baby_gear",
+      "winter_wear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 6",
+      "clothingSize": "M"
+    },
+    "priceSensitivity": "deal",
+    "notifyList": [
+      {
+        "category": "footwear",
+        "maxPrice": 6000
+      },
+      {
+        "category": "baby_gear",
+        "maxPrice": 4500
+      }
+    ]
   },
   {
     "id": "buyer_12",
     "name": "Siddharth Rao",
-    "location": { "lat": 12.9783, "lng": 77.5713, "city": "Bangalore" },
-    "wishlist": ["electronics", "kitchen_appliances"],
-    "trustScore": 97
+    "location": {
+      "lat": 12.9783,
+      "lng": 77.5713,
+      "city": "Bangalore"
+    },
+    "wishlist": [
+      "electronics",
+      "kitchen_appliances"
+    ],
+    "trustScore": 97,
+    "purchaseHistory": [
+      {
+        "category": "electronics",
+        "brand": "Apple"
+      },
+      {
+        "category": "kitchen_appliances",
+        "brand": "Philips"
+      },
+      {
+        "category": "electronics",
+        "brand": "Sony"
+      }
+    ],
+    "recentlyViewed": [
+      "electronics",
+      "kitchen_appliances",
+      "winter_wear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 9",
+      "clothingSize": "L"
+    },
+    "priceSensitivity": "premium",
+    "notifyList": [
+      {
+        "category": "electronics",
+        "maxPrice": 70000
+      },
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 5000
+      }
+    ]
   },
   {
     "id": "buyer_13",
     "name": "Nisha Verma",
-    "location": { "lat": 28.6519, "lng": 77.2315, "city": "Delhi" },
-    "wishlist": ["winter_wear", "footwear"],
-    "trustScore": 84
+    "location": {
+      "lat": 28.6519,
+      "lng": 77.2315,
+      "city": "Delhi"
+    },
+    "wishlist": [
+      "winter_wear",
+      "footwear"
+    ],
+    "trustScore": 84,
+    "purchaseHistory": [
+      {
+        "category": "winter_wear",
+        "brand": "Monte Carlo"
+      },
+      {
+        "category": "footwear",
+        "brand": "Bata"
+      },
+      {
+        "category": "winter_wear",
+        "brand": "Woodland"
+      }
+    ],
+    "recentlyViewed": [
+      "winter_wear",
+      "footwear",
+      "baby_gear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 5",
+      "clothingSize": "S"
+    },
+    "priceSensitivity": "mid",
+    "notifyList": [
+      {
+        "category": "winter_wear",
+        "maxPrice": 4500
+      },
+      {
+        "category": "footwear",
+        "maxPrice": 5000
+      }
+    ]
   },
   {
     "id": "buyer_14",
     "name": "Amit Kulkarni",
-    "location": { "lat": 19.0454, "lng": 72.8897, "city": "Mumbai" },
-    "wishlist": ["kitchen_appliances", "electronics"],
-    "trustScore": 90
+    "location": {
+      "lat": 19.0454,
+      "lng": 72.8897,
+      "city": "Mumbai"
+    },
+    "wishlist": [
+      "kitchen_appliances",
+      "electronics"
+    ],
+    "trustScore": 90,
+    "purchaseHistory": [
+      {
+        "category": "kitchen_appliances",
+        "brand": "Prestige"
+      },
+      {
+        "category": "electronics",
+        "brand": "Samsung"
+      },
+      {
+        "category": "kitchen_appliances",
+        "brand": "Bajaj"
+      }
+    ],
+    "recentlyViewed": [
+      "kitchen_appliances",
+      "electronics",
+      "baby_gear"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 8",
+      "clothingSize": "M"
+    },
+    "priceSensitivity": "mid",
+    "notifyList": [
+      {
+        "category": "kitchen_appliances",
+        "maxPrice": 4000
+      },
+      {
+        "category": "electronics",
+        "maxPrice": 45000
+      }
+    ]
   },
   {
     "id": "buyer_15",
     "name": "Lakshmi Bhat",
-    "location": { "lat": 12.9855, "lng": 77.6056, "city": "Bangalore" },
-    "wishlist": ["baby_gear", "winter_wear"],
-    "trustScore": 86
+    "location": {
+      "lat": 12.9855,
+      "lng": 77.6056,
+      "city": "Bangalore"
+    },
+    "wishlist": [
+      "baby_gear",
+      "winter_wear"
+    ],
+    "trustScore": 86,
+    "purchaseHistory": [
+      {
+        "category": "baby_gear",
+        "brand": "Philips"
+      },
+      {
+        "category": "winter_wear",
+        "brand": "Decathlon"
+      },
+      {
+        "category": "baby_gear",
+        "brand": "LuvLap"
+      }
+    ],
+    "recentlyViewed": [
+      "baby_gear",
+      "winter_wear",
+      "kitchen_appliances"
+    ],
+    "sizeProfile": {
+      "shoeSize": "UK 6",
+      "clothingSize": "M"
+    },
+    "priceSensitivity": "deal",
+    "notifyList": [
+      {
+        "category": "baby_gear",
+        "maxPrice": 5000
+      },
+      {
+        "category": "winter_wear",
+        "maxPrice": 3500
+      }
+    ]
   }
 ]

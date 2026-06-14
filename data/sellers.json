@@ -1,0 +1,34 @@
+[
+  {
+    "id": "seller_rahul",
+    "name": "Rahul Mehra",
+    "avatar": "👨‍💻",
+    "location": { "lat": 19.076, "lng": 72.8777, "city": "Mumbai" },
+    "trustScore": 82,
+    "totalDeals": 5
+  },
+  {
+    "id": "seller_anita",
+    "name": "Anita Deshmukh",
+    "avatar": "👩‍🔬",
+    "location": { "lat": 28.6139, "lng": 77.209, "city": "Delhi" },
+    "trustScore": 91,
+    "totalDeals": 12
+  },
+  {
+    "id": "seller_karthik",
+    "name": "Karthik Iyer",
+    "avatar": "👨‍🎨",
+    "location": { "lat": 12.9716, "lng": 77.5946, "city": "Bangalore" },
+    "trustScore": 77,
+    "totalDeals": 3
+  },
+  {
+    "id": "seller_priyanka",
+    "name": "Priyanka Jain",
+    "avatar": "👩‍💼",
+    "location": { "lat": 19.0596, "lng": 72.8295, "city": "Mumbai" },
+    "trustScore": 88,
+    "totalDeals": 8
+  }
+]

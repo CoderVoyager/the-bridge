@@ -46,6 +46,33 @@ export interface Item {
   photos: string[];
   assessment?: Assessment;
   route?: RouteDecision;
+  customListing?: boolean; // true if not an Amazon purchase
+}
+
+export interface Seller {
+  id: string;
+  name: string;
+  avatar: string;
+  location: Location;
+  trustScore: number;
+  totalDeals: number;
+}
+
+export type PriceSensitivity = 'deal' | 'mid' | 'premium';
+
+export interface PurchaseHistoryEntry {
+  category: string;
+  brand: string;
+}
+
+export interface NotifyEntry {
+  category: string;
+  maxPrice: number;
+}
+
+export interface SizeProfile {
+  shoeSize?: string;
+  clothingSize?: string;
 }
 
 export interface Buyer {
@@ -54,6 +81,11 @@ export interface Buyer {
   location: Location;
   wishlist: string[]; // categories
   trustScore: number;
+  purchaseHistory: PurchaseHistoryEntry[];
+  recentlyViewed: string[]; // categories
+  sizeProfile: SizeProfile;
+  priceSensitivity: PriceSensitivity;
+  notifyList: NotifyEntry[];
 }
 
 export interface LedgerEntry {
