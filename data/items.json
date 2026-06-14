@@ -1,0 +1,77 @@
+[
+  {
+    "id": "item_01",
+    "title": "Nike Air Max 270",
+    "category": "footwear",
+    "brand": "Nike",
+    "originalPrice": 12995,
+    "ageMonths": 8,
+    "location": {
+      "lat": 19.076,
+      "lng": 72.8777,
+      "city": "Mumbai"
+    },
+    "ownerId": "user_self",
+    "photos": []
+  },
+  {
+    "id": "item_02",
+    "title": "Philips Avent Baby Monitor",
+    "category": "baby_gear",
+    "brand": "Philips",
+    "originalPrice": 7499,
+    "ageMonths": 14,
+    "location": {
+      "lat": 19.076,
+      "lng": 72.8777,
+      "city": "Mumbai"
+    },
+    "ownerId": "user_self",
+    "photos": []
+  },
+  {
+    "id": "item_03",
+    "title": "Samsung Galaxy S23",
+    "category": "electronics",
+    "brand": "Samsung",
+    "originalPrice": 74999,
+    "ageMonths": 11,
+    "location": {
+      "lat": 19.076,
+      "lng": 72.8777,
+      "city": "Mumbai"
+    },
+    "ownerId": "user_self",
+    "photos": []
+  },
+  {
+    "id": "item_04",
+    "title": "Woodland Winter Parka",
+    "category": "winter_wear",
+    "brand": "Woodland",
+    "originalPrice": 5999,
+    "ageMonths": 18,
+    "location": {
+      "lat": 19.076,
+      "lng": 72.8777,
+      "city": "Mumbai"
+    },
+    "ownerId": "user_self",
+    "photos": []
+  },
+  {
+    "id": "item_05",
+    "title": "Prestige Iris 750W Mixer Grinder",
+    "category": "kitchen_appliances",
+    "brand": "Prestige",
+    "originalPrice": 4299,
+    "ageMonths": 6,
+    "location": {
+      "lat": 19.076,
+      "lng": 72.8777,
+      "city": "Mumbai"
+    },
+    "ownerId": "user_self",
+    "photos": []
+  }
+]
