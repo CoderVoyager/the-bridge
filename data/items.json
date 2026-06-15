@@ -73,14 +73,14 @@
       ]
     },
     "route": {
-      "path": "ship_direct",
+      "path": "sold",
       "matchedBuyerId": "buyer_05",
       "cost": {
         "shipDirect": 42,
         "warehouseAlt": 1320,
         "carbonKgSaved": 71.88
       },
-      "reason": "Matched buyer nearby (1 km). Direct shipping saves ₹1278 and 71.88 kg CO₂ vs warehouse."
+      "reason": "Purchased by buyer."
     },
     "complementaryKeywords": [
       "phone case",
@@ -234,5 +234,38 @@
       "phone case",
       "screen protector"
     ]
+  },
+  {
+    "id": "item_buyer_1781504524499",
+    "title": "Samsung Galaxy S23",
+    "category": "electronics",
+    "brand": "Samsung",
+    "originalPrice": 40220,
+    "ageMonths": 12,
+    "location": {
+      "lat": 28.6139,
+      "lng": 77.209,
+      "city": "Delhi"
+    },
+    "ownerId": "buyer_01",
+    "photos": [],
+    "assessment": {
+      "grade": {
+        "condition": "good",
+        "defects": [
+          "Only the back panel of the Realme phone is visible",
+          "Front screen, sides, and edges of the Realme phone could not be inspected",
+          "Functionality and performance could not be verified",
+          "Photos include two unrelated iPhone models, making primary product unclear"
+        ],
+        "summary": "The visible back panel of the Realme phone appears to be in excellent condition with no visible defects, but a comprehensive assessment of the entire device and its functionality is not possible due to limited views and the presence of photos of unrelated products.",
+        "confidence": 0.4
+      },
+      "price": 40220,
+      "nearbyDemand": 0,
+      "riskFlags": [
+        "needs_data_wipe"
+      ]
+    }
   }
 ]

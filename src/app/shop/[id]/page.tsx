@@ -199,6 +199,44 @@ export default function BuyerItemPage() {
           </div>
         )}
 
+        {/* Complementary items — post-purchase recommendations */}
+        {result.outcome === "accepted" && complementary.length > 0 && (
+          <div className="rounded-2xl border border-neutral-800 bg-[var(--bg-card)] p-5">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+              🔗 Complete your setup
+            </h3>
+            <p className="text-xs text-[var(--text-secondary)] mb-3">
+              People who bought <span className="text-[var(--text-primary)] font-medium">{item?.title}</span> also added:
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {complementary.map((ci) => {
+                const disc = Math.round(((ci.originalPrice - ci.price) / ci.originalPrice) * 100);
+                return (
+                  <Link
+                    key={ci.id}
+                    href={`/shop/${ci.id}`}
+                    className="rounded-xl border border-neutral-700 bg-neutral-800/50 p-3 hover:border-amber-500/30 transition-colors"
+                  >
+                    <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                      {ci.reason}
+                    </span>
+                    <h4 className="mt-1.5 text-xs font-semibold leading-tight line-clamp-2">{ci.title}</h4>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">{ci.brand}</p>
+                    <div className="mt-1.5 flex items-baseline gap-1">
+                      <span className="text-sm font-bold text-amber-400">₹{ci.price.toLocaleString("en-IN")}</span>
+                      <span className="text-[10px] text-[var(--text-secondary)] line-through">₹{ci.originalPrice.toLocaleString("en-IN")}</span>
+                      <span className="text-[9px] text-green-400 font-bold">-{disc}%</span>
+                    </div>
+                    <span className="mt-1 inline-block rounded bg-neutral-800 px-1.5 py-0.5 text-[9px] text-[var(--text-secondary)] capitalize">
+                      {ci.condition.replace("_", " ")}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-3">
           <Link
             href="/shop"

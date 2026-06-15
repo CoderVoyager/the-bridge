@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "gc_1781504524498_8mcah",
+    "userId": "buyer_01",
+    "itemId": "item_03",
+    "action": "buy_refurbished",
+    "credits": 70,
+    "carbonKgSaved": 0,
+    "description": "Bought Samsung Galaxy S23 second-life",
+    "timestamp": "2026-06-15T06:22:04.498Z"
+  }
+]
