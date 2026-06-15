@@ -145,11 +145,19 @@ export default function CapturePage() {
       });
       if (!res.ok) throw new Error("Failed to save photos");
       
-      // Check if this is a Bridge Return item — redirect to return page instead of result
+      // Check if this is a Bridge Return item
       const itemRes = await fetch(`/api/items/${id}/return`);
       if (itemRes.ok) {
+        // Returnable item — run AI assessment to get real grade
+        // (replaces the preliminary "like_new" assumption)
+        try {
+          await fetch(`/api/items/${id}/assess`, { method: "POST" });
+        } catch {
+          // Non-critical: if grading fails, preliminary assessment remains
+        }
         router.push(`/item/${id}/return`);
       } else {
+        // Non-returnable item — goes to result page (which triggers assess)
         router.push(`/item/${id}/result`);
       }
     } catch {

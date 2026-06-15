@@ -65,7 +65,10 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
     return daysSince <= 30;
   });
 
-  const activeHoldItems = sellerItems.filter((item) => item.returnHold?.status === "holding");
+  const activeHoldItems = sellerItems.filter((item) => 
+    item.returnHold?.status === "holding" && 
+    (!item.route || (item.route.path !== "refurbish" && item.route.path !== "repair" && item.route.path !== "donate"))
+  );
 
   const resaleItems = sellerItems.filter((item) => {
     if (item.customListing) return true; // custom items go here
@@ -78,6 +81,17 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
   // Items eligible for return that haven't been initiated yet
   const pendingReturnItems = returnableItems.filter(
     (item) => !item.returnHold && !item.route
+  );
+
+  // Items routed to warehouse or donated (after AI grading)
+  const warehouseItems = sellerItems.filter((item) =>
+    item.returnHold?.status === "holding" &&
+    item.route && (item.route.path === "refurbish" || item.route.path === "repair")
+  );
+
+  const donatedReturnItems = sellerItems.filter((item) =>
+    item.returnHold?.status === "holding" &&
+    item.route && item.route.path === "donate"
   );
 
   return (
@@ -178,6 +192,61 @@ export default function SellerHome({ allItems, myItems, trust, green }: Props) {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ============================================ */}
+      {/* SECTION 1b: Warehouse/Donated Returns */}
+      {/* ============================================ */}
+      {(warehouseItems.length > 0 || donatedReturnItems.length > 0) && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <span>✅</span> Return Processed
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {warehouseItems.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-orange-500/30 bg-orange-500/5 p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
+                    🔧 Warehouse Refurb
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold">{item.title}</h3>
+                <p className="text-xs text-[var(--text-secondary)]">{item.brand}</p>
+                <div className="mt-3 rounded-lg bg-neutral-800/50 p-2 text-xs">
+                  <span className="text-[var(--text-secondary)]">Refund: </span>
+                  <span className="font-medium text-green-400">₹{item.originalPrice.toLocaleString("en-IN")} processed ✓</span>
+                </div>
+                <Link
+                  href={`/item/${item.id}/return`}
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-xs font-medium text-orange-400 hover:bg-orange-500/20"
+                >
+                  View details →
+                </Link>
+              </div>
+            ))}
+            {donatedReturnItems.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="rounded-full bg-purple-500/10 border border-purple-500/30 px-2.5 py-0.5 text-[10px] font-bold text-purple-400">
+                    🎁 Donated
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold">{item.title}</h3>
+                <p className="text-xs text-[var(--text-secondary)]">{item.brand}</p>
+                <div className="mt-3 rounded-lg bg-neutral-800/50 p-2 text-xs">
+                  <span className="text-[var(--text-secondary)]">Refund: </span>
+                  <span className="font-medium text-green-400">₹{item.originalPrice.toLocaleString("en-IN")} processed ✓</span>
+                </div>
+                <Link
+                  href={`/item/${item.id}/return`}
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-medium text-purple-400 hover:bg-purple-500/20"
+                >
+                  View details →
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       )}

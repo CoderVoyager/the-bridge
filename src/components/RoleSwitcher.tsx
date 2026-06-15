@@ -1,9 +1,12 @@
 "use client";
 
 import { useRole } from "./RoleContext";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function RoleSwitcher() {
   const { role, setRole, activeBuyer, setActiveBuyer, activeSeller, setActiveSeller, buyers, sellers } = useRole();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <div className="flex items-center gap-2">
@@ -14,6 +17,10 @@ export default function RoleSwitcher() {
             setRole("seller");
             if (!activeSeller) {
               setActiveSeller({ id: "user_self", name: "You (My Orders)", city: "Mumbai" });
+            }
+            // Navigate to seller home if currently on buyer pages
+            if (pathname.startsWith("/shop")) {
+              router.push("/");
             }
           }}
           className={`px-3 py-1.5 font-medium transition-colors ${
@@ -29,6 +36,10 @@ export default function RoleSwitcher() {
             setRole("buyer");
             if (!activeBuyer && buyers.length > 0) {
               setActiveBuyer(buyers[0]);
+            }
+            // Navigate to shop if currently on seller pages
+            if (pathname === "/" || pathname.startsWith("/sell") || pathname.startsWith("/seller")) {
+              router.push("/shop");
             }
           }}
           className={`px-3 py-1.5 font-medium transition-colors ${

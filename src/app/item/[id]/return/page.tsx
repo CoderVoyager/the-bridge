@@ -30,13 +30,17 @@ interface ReturnStatusResponse {
   daysLeft: number;
   deliveryCashback: number;
   totalRefund: number;
+  grade?: { condition: string; defects: string[]; summary: string; confidence: number } | null;
+  assessedPrice?: number | null;
+  routeDecision?: string | null;
+  routeReason?: string | null;
 }
 
 export default function ReturnPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [stage, setStage] = useState<"intro" | "capture" | "active" | "expired" | "matched">("intro");
+  const [stage, setStage] = useState<"intro" | "capture" | "active" | "expired" | "matched" | "warehouse" | "donated">("intro");
   const [initiating, setInitiating] = useState(false);
   const [initData, setInitData] = useState<ReturnInitResponse | null>(null);
   const [statusData, setStatusData] = useState<ReturnStatusResponse | null>(null);
@@ -54,6 +58,10 @@ export default function ReturnPage() {
           setStage("expired");
         } else if (json.returnHold.status === "matched" || json.returnHold.status === "completed") {
           setStage("matched");
+        } else if (json.routeDecision === "refurbish" || json.routeDecision === "repair") {
+          setStage("warehouse");
+        } else if (json.routeDecision === "donate") {
+          setStage("donated");
         } else {
           setStage("active");
         }
@@ -145,6 +153,132 @@ export default function ReturnPage() {
               🌍 You saved ~72 kg CO₂ by skipping the warehouse. Amazon saved ₹1,278 in logistics.
             </p>
           </div>
+
+          <div className="mt-5 flex gap-3 justify-center">
+            <Link href="/dashboard" className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400">
+              📊 Dashboard
+            </Link>
+            <Link href="/" className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+              ← Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // === WAREHOUSE STATE (damaged, routed to warehouse for refurb) ===
+  if (stage === "warehouse" && statusData) {
+    const { returnHold } = statusData;
+    return (
+      <div className="mx-auto max-w-lg">
+        <div className="rounded-2xl border border-orange-500/30 bg-orange-500/5 p-8 text-center">
+          <div className="text-5xl mb-3">🔧</div>
+          <h1 className="text-xl font-bold text-orange-400">Routing to Warehouse</h1>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            AI detected damage that can be repaired. Amazon will refurbish and resell as &quot;Renewed.&quot;
+          </p>
+
+          {statusData.grade && (
+            <div className="mt-4 rounded-xl bg-neutral-800/50 border border-neutral-700 p-3 text-left">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="rounded-full bg-red-500/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-bold text-red-400 capitalize">
+                  {statusData.grade.condition.replace("_", " ")}
+                </span>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  {(statusData.grade.confidence * 100).toFixed(0)}% confident
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)]">{statusData.grade.summary}</p>
+              {statusData.grade.defects.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {statusData.grade.defects.map((d: string, i: number) => (
+                    <span key={i} className="rounded-full bg-neutral-800 px-2 py-0.5 text-[10px] text-[var(--text-secondary)]">{d}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {statusData.routeReason && (
+            <div className="mt-3 rounded-lg bg-neutral-800/50 p-2">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-0.5">AI Decision</p>
+              <p className="text-xs text-[var(--text-secondary)]">{statusData.routeReason}</p>
+            </div>
+          )}
+
+          <div className="mt-5 rounded-xl bg-[var(--bg-card)] border border-neutral-800 p-4 text-left space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Full refund</span>
+              <span className="font-medium text-green-400">₹{returnHold.refundAmount.toLocaleString("en-IN")} ✓</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Green Credits</span>
+              <span className="font-medium text-green-400">+25 🌱</span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-[var(--text-secondary)]">
+            Your refund is processed immediately. The item will be picked up and repaired at Amazon&apos;s warehouse.
+          </p>
+
+          <div className="mt-5 flex gap-3 justify-center">
+            <Link href="/dashboard" className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400">
+              📊 Dashboard
+            </Link>
+            <Link href="/" className="rounded-xl border border-neutral-700 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+              ← Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // === DONATED STATE (damaged, not worth refurbing) ===
+  if (stage === "donated" && statusData) {
+    const { returnHold } = statusData;
+    return (
+      <div className="mx-auto max-w-lg">
+        <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-8 text-center">
+          <div className="text-5xl mb-3">🎁</div>
+          <h1 className="text-xl font-bold text-purple-400">Item Will Be Donated</h1>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            AI determined this item&apos;s repair cost exceeds its resale value. It will go to a verified charity partner instead.
+          </p>
+
+          {statusData.grade && (
+            <div className="mt-4 rounded-xl bg-neutral-800/50 border border-neutral-700 p-3 text-left">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="rounded-full bg-red-500/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-bold text-red-400 capitalize">
+                  {statusData.grade.condition.replace("_", " ")}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)]">{statusData.grade.summary}</p>
+            </div>
+          )}
+
+          {statusData.routeReason && (
+            <div className="mt-3 rounded-lg bg-neutral-800/50 p-2">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-0.5">AI Decision</p>
+              <p className="text-xs text-[var(--text-secondary)]">{statusData.routeReason}</p>
+            </div>
+          )}
+
+          <div className="mt-5 rounded-xl bg-[var(--bg-card)] border border-neutral-800 p-4 text-left space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Full refund</span>
+              <span className="font-medium text-green-400">₹{returnHold.refundAmount.toLocaleString("en-IN")} ✓</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Green Credits (for donating)</span>
+              <span className="font-medium text-green-400">+50 🌱</span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-[var(--text-secondary)]">
+            Your refund is processed immediately. Thank you for choosing to donate — it helps reduce waste and supports those in need.
+          </p>
 
           <div className="mt-5 flex gap-3 justify-center">
             <Link href="/dashboard" className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400">

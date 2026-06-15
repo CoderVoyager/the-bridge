@@ -113,5 +113,10 @@ export async function GET(
     daysLeft,
     deliveryCashback,
     totalRefund: hold.refundAmount + deliveryCashback,
+    // AI grade info (if assessment has been done)
+    grade: item.assessment?.grade ?? null,
+    assessedPrice: item.assessment?.price ?? null,
+    routeDecision: item.route?.path ?? null,
+    routeReason: item.route?.reason ?? null,
   });
 }

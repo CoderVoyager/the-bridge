@@ -174,41 +174,33 @@ export function decideRoute(input: RouterInput): RouteDecision {
   // Amazon's responsibility. Warehouse IS an option.
   // ══════════════════════════════════════════════════════════════
 
-  // Rule 2: Damaged + needs physical repair → compare warehouse refurb vs Bridge as-is
+  // Rule 2: Damaged items — decide immediately (no 7-day hold for damaged goods)
   if (grade.condition === 'damaged') {
     const refurbEstimate = getCategoryAdjustedRefurbCost(grade.defects, category);
+    const warehouseCalc = netValueWarehouse(originalPrice, grade.condition, grade.defects, category);
 
-    if (refurbEstimate.needsRepair) {
-      const warehouseCalc = netValueWarehouse(originalPrice, grade.condition, grade.defects, category);
-      const bridgeAsIsPrice = price;
-      const bridgeNet = netValueBridge(bridgeAsIsPrice, cost.shipDirect);
-
-      if (warehouseCalc.netValue > bridgeNet && warehouseCalc.netValue > 0) {
-        return {
-          path: 'refurbish',
-          matchedBuyerId: assessment.matchedBuyerId,
-          cost,
-          reason: `Item needs repair (est. ₹${refurbEstimate.totalCost}). Warehouse refurb yields ₹${warehouseCalc.netValue} net vs Bridge ₹${Math.round(bridgeNet)} net. Routing to warehouse.`,
-        };
-      } else if (bridgeNet > 0 && budgetDemand > 0) {
-        return {
-          path: 'ship_direct',
-          matchedBuyerId: assessment.matchedBuyerId,
-          cost,
-          reason: `Damaged item, but selling "as-is" at ₹${bridgeAsIsPrice} locally (net ₹${Math.round(bridgeNet)}) beats warehouse refurb (net ₹${warehouseCalc.netValue}).`,
-        };
-      } else {
-        return {
-          path: 'donate',
-          cost,
-          reason: `Repair cost (₹${refurbEstimate.totalCost}) exceeds recoverable value. Better donated.`,
-        };
-      }
+    if (warehouseCalc.netValue > 0) {
+      // Profitable to bring back, refurbish, and sell as Renewed
+      return {
+        path: 'refurbish',
+        matchedBuyerId: assessment.matchedBuyerId,
+        cost,
+        reason: `Damaged item. After refurb (est. ₹${refurbEstimate.totalCost}), Amazon can sell as Renewed for ₹${warehouseCalc.warehouseSellingPrice}. Net profit: ₹${warehouseCalc.netValue}. Routing to warehouse.`,
+      };
+    } else {
+      // Not worth bringing back — donate
+      return {
+        path: 'donate',
+        cost,
+        reason: `Damaged item. Refurb cost (₹${refurbEstimate.totalCost}) + logistics (₹1,450) exceeds recoverable value (₹${warehouseCalc.warehouseSellingPrice}). Donating to charity.`,
+      };
     }
-    // Damaged but only cosmetic → fall through to net-value comparison
   }
 
-  // Rule 3: Net Value Comparison — Bridge vs Warehouse
+  // Rule 3: Fair condition — still try local sale, warehouse as fallback
+  // Rule 4: Good/Like_new — 7-day hold, high chance of local buyer
+
+  // Net Value Comparison
   const bridgeNetValue = netValueBridge(price, cost.shipDirect);
   const warehouseCalc = netValueWarehouse(originalPrice, grade.condition, grade.defects, category);
 
