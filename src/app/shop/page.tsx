@@ -21,6 +21,8 @@ interface ShopItem {
   routePath: string;
   ownerId: string;
   customListing: boolean;
+  isOpenBox: boolean;
+  openBoxDaysLeft: number | null;
   relevanceScore: number | null;
   reasons: string[];
 }
@@ -74,6 +76,11 @@ export default function ShopPage() {
   const [noResults, setNoResults] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [notifyToast, setNotifyToast] = useState("");
+  const [filterCondition, setFilterCondition] = useState("");
+  const [filterPriceRange, setFilterPriceRange] = useState("");
+  const [filterDistance, setFilterDistance] = useState("");
+  const [filterItemType, setFilterItemType] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const fetchShop = useCallback(async () => {
@@ -83,6 +90,14 @@ export default function ShopPage() {
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     if (activeCategory) params.set("category", activeCategory);
     if (sortBy) params.set("sort", sortBy);
+    if (filterCondition) params.set("condition", filterCondition);
+    if (filterPriceRange) {
+      const [min, max] = filterPriceRange.split("-");
+      if (min) params.set("priceMin", min);
+      if (max) params.set("priceMax", max);
+    }
+    if (filterDistance) params.set("maxDistance", filterDistance);
+    if (filterItemType) params.set("itemType", filterItemType);
 
     try {
       const res = await fetch(`/api/shop?${params.toString()}`);
@@ -97,7 +112,7 @@ export default function ShopPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeBuyer, searchQuery, activeCategory, sortBy]);
+  }, [activeBuyer, searchQuery, activeCategory, sortBy, filterCondition, filterPriceRange, filterDistance, filterItemType]);
 
   useEffect(() => {
     fetchShop();
@@ -194,6 +209,92 @@ export default function ShopPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Filter bar */}
+      <div className="mx-4 mt-3">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="text-xs text-[var(--text-secondary)] hover:text-amber-400 transition-colors flex items-center gap-1"
+        >
+          <span>🔽</span> {showFilters ? "Hide filters" : "Show filters"}
+          {(filterCondition || filterPriceRange || filterDistance || filterItemType) && (
+            <span className="ml-1 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold text-neutral-900">
+              Active
+            </span>
+          )}
+        </button>
+
+        {showFilters && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {/* Condition filter */}
+            <select
+              value={filterCondition}
+              onChange={(e) => setFilterCondition(e.target.value)}
+              className="rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-amber-500/50"
+            >
+              <option value="">Any condition</option>
+              <option value="like_new">Like New</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+              <option value="like_new,good">Like New + Good</option>
+            </select>
+
+            {/* Price range */}
+            <select
+              value={filterPriceRange}
+              onChange={(e) => setFilterPriceRange(e.target.value)}
+              className="rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-amber-500/50"
+            >
+              <option value="">Any price</option>
+              <option value="0-1000">Under ₹1,000</option>
+              <option value="1000-5000">₹1,000 – ₹5,000</option>
+              <option value="5000-20000">₹5,000 – ₹20,000</option>
+              <option value="20000-50000">₹20,000 – ₹50,000</option>
+              <option value="50000-">₹50,000+</option>
+            </select>
+
+            {/* Distance filter */}
+            <select
+              value={filterDistance}
+              onChange={(e) => setFilterDistance(e.target.value)}
+              className="rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-amber-500/50"
+            >
+              <option value="">Any distance</option>
+              <option value="5">Within 5 km</option>
+              <option value="10">Within 10 km</option>
+              <option value="25">Within 25 km</option>
+              <option value="50">Within 50 km</option>
+              <option value="200">Within 200 km</option>
+            </select>
+
+            {/* Item type */}
+            <select
+              value={filterItemType}
+              onChange={(e) => setFilterItemType(e.target.value)}
+              className="rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-amber-500/50"
+            >
+              <option value="">All items</option>
+              <option value="openbox">Open-box returns only</option>
+              <option value="resale">Resale only</option>
+            </select>
+
+            {/* Clear filters */}
+            {(filterCondition || filterPriceRange || filterDistance || filterItemType) && (
+              <button
+                onClick={() => {
+                  setFilterCondition("");
+                  setFilterPriceRange("");
+                  setFilterDistance("");
+                  setFilterItemType("");
+                }}
+                className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
+              >
+                ✕ Clear all
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Notify toast */}
@@ -328,6 +429,12 @@ export default function ShopPage() {
                   <span className={`absolute top-2 left-2 rounded-full border px-2 py-0.5 text-[10px] font-bold ${condBadge.color}`}>
                     {condBadge.label}
                   </span>
+                  {/* Open-box badge */}
+                  {item.isOpenBox && (
+                    <span className="absolute top-2 left-20 rounded-full bg-purple-600 border border-purple-400 px-2 py-0.5 text-[10px] font-bold text-white">
+                      📦 Open-box • {item.openBoxDaysLeft}d left
+                    </span>
+                  )}
                   {/* Distance badge */}
                   {item.distanceKm !== null && (
                     <span className="absolute top-2 right-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] text-white font-medium">

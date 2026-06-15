@@ -159,6 +159,22 @@ export default function ResultPage() {
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
             Your item is now live. Buyers can find it, and you&apos;ll see interest signals on your dashboard.
           </p>
+          {data && (
+            <div className="mt-4 rounded-xl bg-neutral-800/50 border border-neutral-700 p-3 text-left space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Listed price</span>
+                <span className="font-medium text-amber-400">₹{data.price.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Interested buyers</span>
+                <span className="font-medium text-green-400">{data.interestedBuyersCount} nearby</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">CO₂ saved vs warehouse</span>
+                <span className="font-medium text-green-400">{data.carbonKgSaved.toFixed(1)} kg</span>
+              </div>
+            </div>
+          )}
           <div className="mt-5 flex gap-3 justify-center">
             <Link href="/seller/dashboard" className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-amber-400">
               📊 View Dashboard
@@ -179,8 +195,13 @@ export default function ResultPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">AI Assessment</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">AI Assessment</h1>
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+            Beyond return window — list for resale and earn money
+          </p>
+        </div>
         <Link href="/" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">← Home</Link>
       </div>
 
@@ -289,14 +310,17 @@ export default function ResultPage() {
               disabled={listing}
               className="w-full rounded-xl bg-amber-500 px-6 py-4 text-base font-black text-neutral-900 transition-all hover:bg-amber-400 hover:scale-[1.01] disabled:opacity-50"
             >
-              {listing ? "Listing…" : "🛒 List on Marketplace"}
+              {listing ? "Listing…" : `🛒 List on Marketplace — earn ₹${price.toLocaleString("en-IN")}`}
             </button>
           )}
           {recommendation === "donate" && (
             <>
-              <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-center">
-                <p className="text-sm text-purple-400 font-medium">
-                  🎁 This item&apos;s resale value is lower than shipping cost. We recommend donating it.
+              <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4">
+                <p className="text-sm text-purple-400 font-medium text-center">
+                  🎁 Resale value (₹{price.toLocaleString("en-IN")}) is lower than shipping cost. Donation recommended.
+                </p>
+                <p className="text-xs text-[var(--text-secondary)] text-center mt-1">
+                  Your item will go to a verified charity partner. You&apos;ll earn 50 Green Credits.
                 </p>
               </div>
               <button
@@ -304,15 +328,18 @@ export default function ResultPage() {
                 disabled={listing}
                 className="w-full rounded-xl bg-purple-500 px-6 py-4 text-base font-bold text-white transition-colors hover:bg-purple-400 disabled:opacity-50"
               >
-                {listing ? "Processing…" : "🎁 Donate This Item"}
+                {listing ? "Processing…" : "🎁 Donate & Earn 50 Green Credits"}
               </button>
             </>
           )}
           {recommendation === "recycle" && (
             <>
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center">
-                <p className="text-sm text-red-400 font-medium">
-                  ♻️ This item is flagged as recalled/hazardous and cannot be resold. Recycle responsibly.
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                <p className="text-sm text-red-400 font-medium text-center">
+                  ♻️ This item is flagged as recalled/hazardous and cannot be resold.
+                </p>
+                <p className="text-xs text-[var(--text-secondary)] text-center mt-1">
+                  We&apos;ll schedule a safe recycling pickup. Materials will be responsibly recovered.
                 </p>
               </div>
               <button

@@ -57,6 +57,9 @@ export default function BuyerItemPage() {
   const [sellerTrust, setSellerTrust] = useState<TrustRecord | null>(null);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
   const [isNearby, setIsNearby] = useState(false);
+  const [isOpenBox, setIsOpenBox] = useState(false);
+  const [openBoxDaysLeft, setOpenBoxDaysLeft] = useState<number | null>(null);
+  const [complementary, setComplementary] = useState<Array<{ id: string; title: string; brand: string; category: string; price: number; originalPrice: number; condition: string; city: string; reason: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   // Buy flow state
@@ -75,6 +78,9 @@ export default function BuyerItemPage() {
       setSellerTrust(json.sellerTrust);
       setDistanceKm(json.distanceKm);
       setIsNearby(json.isNearby);
+      setIsOpenBox(json.isOpenBox ?? false);
+      setOpenBoxDaysLeft(json.openBoxDaysLeft ?? null);
+      setComplementary(json.complementaryItems ?? []);
     } catch {
       // handle
     } finally {
@@ -128,6 +134,7 @@ export default function BuyerItemPage() {
   const saving = item.originalPrice - assessment.price;
   const savingPct = Math.round((saving / item.originalPrice) * 100);
   const deliveryNote = isNearby ? "⚡ Same-day local delivery" : "📦 Standard delivery (2-3 days)";
+  const openBoxLabel = isOpenBox ? `📦 Open-box return • ${openBoxDaysLeft} day${openBoxDaysLeft !== 1 ? "s" : ""} left` : null;
 
   // Delivery step gets dynamic description
   const steps = BUY_STEPS.map((s, i) =>
@@ -299,6 +306,19 @@ export default function BuyerItemPage() {
         ← Back to Shop
       </Link>
 
+      {/* Open-box banner */}
+      {openBoxLabel && (
+        <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-3 flex items-center gap-2">
+          <span className="text-lg">📦</span>
+          <div>
+            <p className="text-sm font-semibold text-purple-400">Open-Box Deal</p>
+            <p className="text-xs text-[var(--text-secondary)]">
+              This item is a recent return — AI-verified condition. {openBoxDaysLeft} day{openBoxDaysLeft !== 1 ? "s" : ""} left to purchase.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Price hero */}
       <div className="rounded-2xl border border-neutral-800 bg-[var(--bg-card)] p-6">
         <h1 className="text-2xl font-bold">{item.title}</h1>
@@ -375,6 +395,41 @@ export default function BuyerItemPage() {
                 <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Complementary items */}
+      {complementary.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            🔗 Complete your setup
+          </p>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {complementary.map((ci) => {
+              const disc = Math.round(((ci.originalPrice - ci.price) / ci.originalPrice) * 100);
+              return (
+                <Link
+                  key={ci.id}
+                  href={`/shop/${ci.id}`}
+                  className="shrink-0 w-40 rounded-xl border border-neutral-800 bg-[var(--bg-card)] p-3 hover:border-amber-500/30 transition-colors"
+                >
+                  <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                    {ci.reason}
+                  </span>
+                  <h4 className="mt-1.5 text-xs font-semibold leading-tight line-clamp-2">{ci.title}</h4>
+                  <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">{ci.brand}</p>
+                  <div className="mt-1.5 flex items-baseline gap-1">
+                    <span className="text-sm font-bold text-amber-400">₹{ci.price.toLocaleString("en-IN")}</span>
+                    <span className="text-[10px] text-[var(--text-secondary)] line-through">₹{ci.originalPrice.toLocaleString("en-IN")}</span>
+                    <span className="text-[9px] text-green-400 font-bold">-{disc}%</span>
+                  </div>
+                  <span className="mt-1 inline-block rounded bg-neutral-800 px-1.5 py-0.5 text-[9px] text-[var(--text-secondary)] capitalize">
+                    {ci.condition.replace("_", " ")}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

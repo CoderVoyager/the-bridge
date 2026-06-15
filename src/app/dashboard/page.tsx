@@ -15,6 +15,11 @@ interface DashboardData {
     totalCarbonKg: number;
     entryCount: number;
   };
+  bridgeReturns: {
+    activeHolds: number;
+    matchedReturns: number;
+    totalWarehouseSaved: number;
+  };
 }
 
 export default function DashboardPage() {
@@ -131,6 +136,29 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Bridge Returns Card */}
+      {data.bridgeReturns && (
+        <div className="mt-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 mb-3 text-center">
+            🌉 Bridge Returns
+          </h3>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <p className="text-2xl font-bold text-blue-400">{data.bridgeReturns.activeHolds}</p>
+              <p className="text-[10px] text-[var(--text-secondary)]">Active holds</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-400">{data.bridgeReturns.matchedReturns}</p>
+              <p className="text-[10px] text-[var(--text-secondary)]">Matched</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-400">₹{data.bridgeReturns.totalWarehouseSaved.toLocaleString("en-IN")}</p>
+              <p className="text-[10px] text-[var(--text-secondary)]">Warehouse cost saved</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Impact summary */}
       <div className="mt-6 rounded-2xl border border-green-500/20 bg-green-500/5 p-5 text-center">

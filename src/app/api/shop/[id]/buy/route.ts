@@ -3,7 +3,7 @@ import { getItemById, getBuyerById, addItem, updateItem } from '@/lib/store';
 import { recordSuccessfulDeal, recordDispute, getTrustRecord } from '@/lib/trust';
 import { awardGreenCredits } from '@/lib/green';
 import { distanceKm } from '@/lib/buyer';
-import { Item } from '@/lib/types';
+import { Item, computeDeliveryCashback } from '@/lib/types';
 
 const CARBON_PER_KM = 0.12;
 const WAREHOUSE_DISTANCE_KM = 600;
@@ -70,21 +70,53 @@ export async function POST(
     updateItem(id, {
       route: {
         ...(item.route ?? { path: 'ship_direct', cost: { shipDirect: 0, warehouseAlt: 0, carbonKgSaved: 0 }, reason: '' }),
-        path: 'sold' as never, // mark as sold
+        path: 'sold' as never,
         reason: 'Purchased by buyer.',
       },
     });
 
+    // Handle Bridge Return: compute seller's delivery cashback
+    let sellerDeliveryCashback = 0;
+    let isOpenBoxPurchase = false;
+    if (item.returnHold && item.returnHold.status === 'holding') {
+      isOpenBoxPurchase = true;
+      const now = Date.now();
+      const daysWaited = Math.floor((now - new Date(item.returnHold.initiatedAt).getTime()) / (1000 * 60 * 60 * 24));
+      sellerDeliveryCashback = computeDeliveryCashback(daysWaited, item.returnHold.originalDeliveryCharge);
+      // Update the returnHold to matched
+      updateItem(id, {
+        returnHold: {
+          ...item.returnHold,
+          status: 'matched',
+          daysWaited,
+          deliveryCashback: sellerDeliveryCashback,
+        },
+      });
+      // Award seller green credits for Bridge Return
+      awardGreenCredits(
+        item.ownerId,
+        item.id,
+        'prevent_a_return',
+        Math.max(0, Math.round(carbonKgSaved * 100) / 100),
+        `Bridge Return: ${item.title} matched locally`
+      );
+    }
+
     return NextResponse.json({
       success: true,
       outcome: 'accepted',
-      message: 'Purchase complete! Funds released to seller.',
+      message: isOpenBoxPurchase
+        ? 'Purchase complete! Seller gets full refund + delivery cashback.'
+        : 'Purchase complete! Funds released to seller.',
       sellerTrust,
       buyerTrust,
       greenCredits: greenEntry,
       priceSaving,
       carbonKgSaved: Math.max(0, Math.round(carbonKgSaved * 100) / 100),
       loopItemId: loopItem.id,
+      isOpenBoxPurchase,
+      sellerDeliveryCashback,
+      sellerRefund: item.returnHold?.refundAmount ?? null,
     });
   } else if (action === 'dispute') {
     // Seller trust penalized

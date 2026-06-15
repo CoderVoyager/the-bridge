@@ -144,7 +144,14 @@ export default function CapturePage() {
         body: JSON.stringify({ photos }),
       });
       if (!res.ok) throw new Error("Failed to save photos");
-      router.push(`/item/${id}/result`);
+      
+      // Check if this is a Bridge Return item — redirect to return page instead of result
+      const itemRes = await fetch(`/api/items/${id}/return`);
+      if (itemRes.ok) {
+        router.push(`/item/${id}/return`);
+      } else {
+        router.push(`/item/${id}/result`);
+      }
     } catch {
       setError("Failed to save photos. Please try again.");
       setSubmitting(false);

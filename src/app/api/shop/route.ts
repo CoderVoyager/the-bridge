@@ -31,9 +31,15 @@ export async function GET(request: NextRequest) {
   const sortBy = request.nextUrl.searchParams.get('sort') ?? 'relevant';
   const filterCategory = request.nextUrl.searchParams.get('category') ?? '';
   const filterCondition = request.nextUrl.searchParams.get('condition') ?? '';
+  const filterPriceMin = request.nextUrl.searchParams.get('priceMin');
   const filterPriceMax = request.nextUrl.searchParams.get('priceMax');
+  const filterMaxDistance = request.nextUrl.searchParams.get('maxDistance');
+  const filterItemType = request.nextUrl.searchParams.get('itemType') ?? '';
+  const filterBrand = request.nextUrl.searchParams.get('brand') ?? '';
+  const filterMinDiscount = request.nextUrl.searchParams.get('minDiscount');
 
   const items = getItems();
+  const buyer = buyerId ? getBuyerById(buyerId) : null;
 
   // Filter to items available for resale (routed to ship_direct or list_hold, and have assessment)
   let available = items.filter(
@@ -62,18 +68,48 @@ export async function GET(request: NextRequest) {
     available = available.filter((item) => item.category === filterCategory);
   }
 
-  // Apply condition filter
+  // Apply condition filter (supports comma-separated: "like_new,good")
   if (filterCondition) {
-    available = available.filter((item) => item.assessment!.grade.condition === filterCondition);
+    const conditions = filterCondition.split(',');
+    available = available.filter((item) => conditions.includes(item.assessment!.grade.condition));
   }
 
-  // Apply price filter
+  // Apply price range filter
+  if (filterPriceMin) {
+    const min = Number(filterPriceMin);
+    available = available.filter((item) => item.assessment!.price >= min);
+  }
   if (filterPriceMax) {
     const max = Number(filterPriceMax);
     available = available.filter((item) => item.assessment!.price <= max);
   }
 
-  const buyer = buyerId ? getBuyerById(buyerId) : null;
+  // Apply distance filter (requires buyer location)
+  if (filterMaxDistance && buyer) {
+    const maxDist = Number(filterMaxDistance);
+    available = available.filter((item) => distanceKm(buyer.location, item.location) <= maxDist);
+  }
+
+  // Apply item type filter
+  if (filterItemType === 'openbox') {
+    available = available.filter((item) => item.returnHold?.status === 'holding');
+  } else if (filterItemType === 'resale') {
+    available = available.filter((item) => !item.returnHold);
+  }
+
+  // Apply brand filter
+  if (filterBrand) {
+    available = available.filter((item) => item.brand.toLowerCase() === filterBrand.toLowerCase());
+  }
+
+  // Apply minimum discount filter
+  if (filterMinDiscount) {
+    const minDisc = Number(filterMinDiscount) / 100;
+    available = available.filter((item) => {
+      const discount = (item.originalPrice - item.assessment!.price) / item.originalPrice;
+      return discount >= minDisc;
+    });
+  }
 
   // Score for personalization
   const personalScores = buyer ? scoreItemsForBuyer(buyer, available) : null;
@@ -123,6 +159,10 @@ export async function GET(request: NextRequest) {
       routePath: item.route!.path,
       ownerId: item.ownerId,
       customListing: item.customListing ?? false,
+      isOpenBox: !!item.returnHold && item.returnHold.status === 'holding',
+      openBoxDaysLeft: item.returnHold?.status === 'holding'
+        ? Math.max(0, Math.ceil((new Date(item.returnHold.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+        : null,
       relevanceScore: scoreInfo?.totalScore ?? null,
       reasons: scoreInfo?.reasons ?? [],
     };

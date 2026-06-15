@@ -1,16 +1,16 @@
 {
   "user_self": {
     "sellerId": "user_self",
-    "score": 94,
+    "score": 77,
     "totalDeals": 4,
-    "acceptedAsGraded": 4,
-    "disputes": 0
+    "acceptedAsGraded": 3,
+    "disputes": 1
   },
   "buyer_01": {
     "sellerId": "buyer_01",
-    "score": 91,
-    "totalDeals": 1,
-    "acceptedAsGraded": 1,
+    "score": 60,
+    "totalDeals": 0,
+    "acceptedAsGraded": 0,
     "disputes": 0
   }
 }
