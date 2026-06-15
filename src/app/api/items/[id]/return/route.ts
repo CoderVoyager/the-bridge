@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getItemById, updateItem } from '@/lib/store';
 import { matchBuyers } from '@/lib/matching';
-import { ReturnHold } from '@/lib/types';
+import { ReturnHold, Assessment } from '@/lib/types';
 
 export async function POST(
   _request: NextRequest,
@@ -18,8 +18,10 @@ export async function POST(
     return NextResponse.json({ error: 'Bridge return already initiated for this item.' }, { status: 400 });
   }
 
-  // Check how many nearby buyers want this category
-  const matchResult = matchBuyers(item.category, item.location);
+  // Check how many nearby buyers want this category (pass price for budget filtering)
+  // For Bridge Returns, use open-box pricing (~90% of original for like_new estimate)
+  const estimatedOpenBoxPrice = Math.round(item.originalPrice * 0.9);
+  const matchResult = matchBuyers(item.category, item.location, estimatedOpenBoxPrice);
 
   // Create the return hold
   const now = new Date();
@@ -37,6 +39,21 @@ export async function POST(
     interestedCount: matchResult.nearbyDemand,
   };
 
+  // Create a preliminary assessment so item appears on marketplace immediately
+  // (will be updated with real AI grade after photos are captured)
+  const preliminaryAssessment = item.assessment ?? {
+    grade: {
+      condition: 'like_new' as const,
+      defects: [],
+      summary: 'Open-box return — condition pending AI verification after photo capture.',
+      confidence: 0.5,
+    },
+    price: Math.round(item.originalPrice * 0.9 / 10) * 10, // 10% off as open-box default
+    matchedBuyerId: matchResult.bestBuyerId,
+    nearbyDemand: matchResult.nearbyDemand,
+    riskFlags: [],
+  };
+
   // Also set a route so it appears in the shop as "open-box"
   const route = {
     path: 'ship_direct' as const,
@@ -49,7 +66,7 @@ export async function POST(
     reason: 'Bridge Return — holding for nearby buyer match.',
   };
 
-  updateItem(id, { returnHold, route });
+  updateItem(id, { returnHold, route, assessment: preliminaryAssessment });
 
   return NextResponse.json({
     success: true,

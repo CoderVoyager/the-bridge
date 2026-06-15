@@ -1,52 +1,22 @@
 [
   {
     "type": "view",
-    "itemId": "item_03",
+    "itemId": "item_01",
     "buyerCity": "Delhi",
     "distanceKm": 1148,
     "buyerId": "buyer_01",
     "sellerId": "user_self",
-    "id": "evt_1781502106914_kqsv",
-    "timestamp": "2026-06-15T05:41:46.914Z"
+    "id": "evt_1781516162515_cvt3",
+    "timestamp": "2026-06-15T09:36:02.515Z"
   },
   {
     "type": "view",
-    "itemId": "item_04",
+    "itemId": "item_01",
     "buyerCity": "Delhi",
     "distanceKm": 1148,
     "buyerId": "buyer_01",
     "sellerId": "user_self",
-    "id": "evt_1781503442232_3us2",
-    "timestamp": "2026-06-15T06:04:02.232Z"
-  },
-  {
-    "type": "view",
-    "itemId": "item_03",
-    "buyerCity": "Delhi",
-    "distanceKm": 1148,
-    "buyerId": "buyer_01",
-    "sellerId": "user_self",
-    "id": "evt_1781503778502_uxw6",
-    "timestamp": "2026-06-15T06:09:38.502Z"
-  },
-  {
-    "type": "view",
-    "itemId": "item_03",
-    "buyerCity": "Delhi",
-    "distanceKm": 1148,
-    "buyerId": "buyer_01",
-    "sellerId": "user_self",
-    "id": "evt_1781503789987_3lxy",
-    "timestamp": "2026-06-15T06:09:49.987Z"
-  },
-  {
-    "type": "view",
-    "itemId": "item_03",
-    "buyerCity": "Delhi",
-    "distanceKm": 1148,
-    "buyerId": "buyer_01",
-    "sellerId": "user_self",
-    "id": "evt_1781504513943_2f5y",
-    "timestamp": "2026-06-15T06:21:53.943Z"
+    "id": "evt_1781516310359_4xsv",
+    "timestamp": "2026-06-15T09:38:30.359Z"
   }
 ]

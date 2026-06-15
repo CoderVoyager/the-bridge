@@ -15,7 +15,7 @@ interface AssessmentResponse {
   success: boolean;
   grade: GradeData;
   price: number;
-  recommendation: "list" | "donate" | "recycle";
+  recommendation: "list" | "donate" | "recycle" | "refurbish";
   interestedBuyersCount: number;
   riskFlags: string[];
   costComparison: {
@@ -25,6 +25,8 @@ interface AssessmentResponse {
   };
   carbonKgSaved: number;
   routePath: string;
+  routeReason: string;
+  isReturnable: boolean;
   error?: string;
 }
 
@@ -73,14 +75,18 @@ export default function ResultPage() {
     }
   }, [id]);
 
-  const handleList = useCallback(async () => {
+  const handleList = useCallback(async (action: "list" | "donate" | "recycle" = "list") => {
     setListing(true);
     try {
-      const res = await fetch(`/api/items/${id}/list`, { method: "POST" });
+      const res = await fetch(`/api/items/${id}/list`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
       if (res.ok) {
         setListed(true);
       } else {
-        setError("Failed to list item.");
+        setError("Failed to process item.");
       }
     } catch {
       setError("Network error.");
@@ -207,8 +213,8 @@ export default function ResultPage() {
 
       <div className="space-y-4">
 
-        {/* ===== COST COMPARISON — most prominent ===== */}
-        {recommendation === "list" && (
+        {/* ===== COST COMPARISON — only for returnable items (within 30 days) ===== */}
+        {recommendation === "list" && data!.isReturnable && (
           <div className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent p-6 shadow-lg shadow-amber-500/5">
             <h2 className="mb-1 text-center text-lg font-bold text-amber-400">
               💰 Why list on The Bridge?
@@ -246,6 +252,31 @@ export default function ResultPage() {
               <div className="mt-4 rounded-xl border-2 border-amber-400/40 bg-amber-500/15 p-3 text-center">
                 <p className="text-lg font-black text-amber-400">
                   Save ₹{moneySaved.toLocaleString("en-IN")} + {carbonKgSaved.toFixed(1)} kg CO₂
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== EARNINGS CARD — for non-returnable (old) items ===== */}
+        {recommendation === "list" && !data!.isReturnable && (
+          <div className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent p-6 shadow-lg shadow-amber-500/5">
+            <h2 className="mb-1 text-center text-lg font-bold text-amber-400">
+              💰 List & Earn
+            </h2>
+            <p className="mb-4 text-center text-xs text-[var(--text-secondary)]">
+              Give your item a second life and earn money
+            </p>
+            <div className="text-center">
+              <div className="text-4xl font-black text-amber-400">
+                ₹{price.toLocaleString("en-IN")}
+              </div>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">estimated earnings</p>
+            </div>
+            {interestedBuyersCount > 0 && (
+              <div className="mt-4 rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-center">
+                <p className="text-sm font-medium text-green-400">
+                  🔥 {interestedBuyersCount} buyer{interestedBuyersCount !== 1 ? "s" : ""} nearby can afford this
                 </p>
               </div>
             )}
@@ -302,29 +333,63 @@ export default function ResultPage() {
           </div>
         )}
 
+        {/* Route reasoning */}
+        {data!.routeReason && (
+          <div className="rounded-xl border border-neutral-700 bg-neutral-800/30 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">🧠 AI Routing Decision</p>
+            <p className="text-xs text-[var(--text-secondary)]">{data!.routeReason}</p>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="space-y-3 pt-2">
           {recommendation === "list" && (
             <button
-              onClick={handleList}
+              onClick={() => handleList("list")}
               disabled={listing}
               className="w-full rounded-xl bg-amber-500 px-6 py-4 text-base font-black text-neutral-900 transition-all hover:bg-amber-400 hover:scale-[1.01] disabled:opacity-50"
             >
               {listing ? "Listing…" : `🛒 List on Marketplace — earn ₹${price.toLocaleString("en-IN")}`}
             </button>
           )}
+          {recommendation === "refurbish" && (
+            <>
+              <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+                <p className="text-sm text-orange-400 font-medium text-center">
+                  🔧 This item needs repair before resale
+                </p>
+                <p className="text-xs text-[var(--text-secondary)] text-center mt-1">
+                  AI detected damage that requires warehouse refurbishment. After repair, Amazon will list it as &quot;Renewed&quot; at a higher price.
+                </p>
+              </div>
+              <button
+                onClick={() => handleList("list")}
+                disabled={listing}
+                className="w-full rounded-xl bg-orange-500 px-6 py-4 text-base font-bold text-white transition-colors hover:bg-orange-400 disabled:opacity-50"
+              >
+                {listing ? "Processing…" : "🔧 Send to Warehouse for Refurbishment"}
+              </button>
+              <button
+                onClick={() => handleList("list")}
+                disabled={listing}
+                className="w-full rounded-xl border border-neutral-700 px-6 py-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              >
+                List as-is at ₹{price.toLocaleString("en-IN")} (deep discount)
+              </button>
+            </>
+          )}
           {recommendation === "donate" && (
             <>
               <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4">
                 <p className="text-sm text-purple-400 font-medium text-center">
-                  🎁 Resale value (₹{price.toLocaleString("en-IN")}) is lower than shipping cost. Donation recommended.
+                  🎁 Resale value too low for marketplace listing. Donation recommended.
                 </p>
                 <p className="text-xs text-[var(--text-secondary)] text-center mt-1">
                   Your item will go to a verified charity partner. You&apos;ll earn 50 Green Credits.
                 </p>
               </div>
               <button
-                onClick={handleList}
+                onClick={() => handleList("donate")}
                 disabled={listing}
                 className="w-full rounded-xl bg-purple-500 px-6 py-4 text-base font-bold text-white transition-colors hover:bg-purple-400 disabled:opacity-50"
               >

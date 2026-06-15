@@ -25,13 +25,18 @@ export interface MatchResult {
   bestBuyerCity: string | undefined;
   bestBuyerDistanceKm: number;
   nearbyDemand: number;
+  budgetMatchedDemand: number; // buyers who can also afford the item
 }
 
 /**
- * Find the best-matched buyer for an item based on category + proximity.
- * Returns the top buyer and a count of category-matching buyers within radius.
+ * Find the best-matched buyer for an item based on category + proximity + budget.
+ * Returns the top buyer and counts of demand (total and budget-filtered).
  */
-export function matchBuyers(category: string, itemLocation: Location): MatchResult {
+export function matchBuyers(
+  category: string,
+  itemLocation: Location,
+  itemPrice?: number
+): MatchResult {
   const buyers = getBuyers();
 
   // Filter to buyers whose wishlist includes this category
@@ -46,15 +51,38 @@ export function matchBuyers(category: string, itemLocation: Location): MatchResu
   }));
 
   // Count how many are within radius
-  const nearbyDemand = withDistance.filter(
+  const nearbyAll = withDistance.filter(
     (bd) => bd.distance <= NEARBY_DEMAND_RADIUS_KM
-  ).length;
+  );
+  const nearbyDemand = nearbyAll.length;
 
-  // Rank: nearest first (category already matched)
-  withDistance.sort((a, b) => a.distance - b.distance);
+  // Budget-filtered demand: buyers whose maxPrice for this category >= item price
+  let budgetMatchedDemand = nearbyDemand;
+  if (itemPrice !== undefined && itemPrice > 0) {
+    budgetMatchedDemand = nearbyAll.filter((bd) => {
+      const notify = bd.buyer.notifyList.find((n) => n.category === category);
+      if (!notify) return true; // no explicit cap = willing to pay any price in wishlist
+      return notify.maxPrice >= itemPrice;
+    }).length;
+  }
 
-  const best = withDistance[0]?.buyer;
-  const bestDistance = withDistance[0]?.distance ?? 0;
+  // Rank: nearest first among budget-matched buyers (category already matched)
+  const budgetFiltered = itemPrice
+    ? withDistance.filter((bd) => {
+        const notify = bd.buyer.notifyList.find((n) => n.category === category);
+        if (!notify) return true;
+        return notify.maxPrice >= itemPrice;
+      })
+    : withDistance;
+
+  budgetFiltered.sort((a, b) => a.distance - b.distance);
+
+  // Fallback to unfiltered if no budget match
+  const sorted = budgetFiltered.length > 0 ? budgetFiltered : withDistance;
+  sorted.sort((a, b) => a.distance - b.distance);
+
+  const best = sorted[0]?.buyer;
+  const bestDistance = sorted[0]?.distance ?? 0;
 
   return {
     bestBuyerId: best?.id,
@@ -62,5 +90,6 @@ export function matchBuyers(category: string, itemLocation: Location): MatchResu
     bestBuyerCity: best?.location.city,
     bestBuyerDistanceKm: Math.round(bestDistance),
     nearbyDemand,
+    budgetMatchedDemand,
   };
 }

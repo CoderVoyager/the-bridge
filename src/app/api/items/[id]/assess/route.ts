@@ -4,8 +4,19 @@ import { calculatePrice } from '@/lib/pricing';
 import { matchBuyers } from '@/lib/matching';
 import { computeRiskFlags } from '@/lib/risk';
 import { decideRoute } from '@/lib/router';
-import { Assessment, Grade } from '@/lib/types';
+import { Assessment, Grade, Item } from '@/lib/types';
 import { GoogleGenAI } from '@google/genai';
+
+/**
+ * Check if an item is within the return window (≤30 days from purchase).
+ * These are Amazon's responsibility — warehouse is a valid routing option.
+ */
+function isWithinReturnWindow(item: Item): boolean {
+  if (item.customListing) return false; // custom items are never Amazon returns
+  if (!item.purchaseDate) return false;
+  const daysSince = (Date.now() - new Date(item.purchaseDate).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince <= 30;
+}
 
 export async function POST(
   request: NextRequest,
@@ -37,10 +48,7 @@ export async function POST(
 
     const { grade } = (await gradeRes.json()) as { grade: Grade };
 
-    // 2. Matching (internal — for demand count only, not shown to seller)
-    const matchResult = matchBuyers(item.category, item.location);
-
-    // 3. Pricing — different for Bridge Returns vs Resale
+    // 2. Pricing — different for Bridge Returns vs Resale (compute first for budget matching)
     let price: number;
     const isBridgeReturn = !!item.returnHold;
 
@@ -56,7 +64,15 @@ export async function POST(
       price = Math.round((item.originalPrice * factor) / 10) * 10;
     } else {
       // Normal resale pricing (deeper discounts for older items)
-      price = calculatePrice(item.originalPrice, grade.condition, matchResult.nearbyDemand);
+      price = calculatePrice(item.originalPrice, grade.condition, 5); // initial estimate with avg demand
+    }
+
+    // 3. Matching with budget filter (pass computed price for budget check)
+    const matchResult = matchBuyers(item.category, item.location, price);
+
+    // Recalculate price with actual demand if not bridge return
+    if (!isBridgeReturn) {
+      price = calculatePrice(item.originalPrice, grade.condition, matchResult.budgetMatchedDemand);
     }
 
     // 4. Risk flags
@@ -75,6 +91,10 @@ export async function POST(
     const route = decideRoute({
       assessment,
       buyerDistanceKm: matchResult.bestBuyerDistanceKm,
+      category: item.category,
+      originalPrice: item.originalPrice,
+      budgetMatchedDemand: matchResult.budgetMatchedDemand,
+      isReturnable: isBridgeReturn || isWithinReturnWindow(item),
     });
 
     // Save on item (assessment + route stored for buyer-side use)
@@ -108,16 +128,17 @@ export async function POST(
 
     const updated = updateItem(id, { assessment, route, complementaryKeywords });
 
-    // Determine seller-facing recommendation
-    const isListable = !riskFlags.includes('block_resale') && price >= route.cost.shipDirect;
+    // Determine seller-facing recommendation — follows the router's decision
     const recommendation = riskFlags.includes('block_resale')
       ? 'recycle'
-      : !isListable
+      : route.path === 'donate'
       ? 'donate'
-      : 'list';
+      : route.path === 'refurbish' || route.path === 'repair'
+      ? 'refurbish'
+      : 'list'; // ship_direct and list_hold both mean "list on marketplace"
 
-    // Total interested buyers count (anonymous)
-    const interestedBuyersCount = matchResult.nearbyDemand;
+    // Total interested buyers count (budget-filtered for accuracy)
+    const interestedBuyersCount = matchResult.budgetMatchedDemand;
 
     return NextResponse.json({
       success: true,
@@ -129,6 +150,8 @@ export async function POST(
       riskFlags,
       costComparison: route.cost,
       carbonKgSaved: route.cost.carbonKgSaved,
+      routeReason: route.reason,
+      isReturnable: isBridgeReturn || isWithinReturnWindow(item),
       // Internal (not displayed to seller but needed)
       routePath: route.path,
     });
