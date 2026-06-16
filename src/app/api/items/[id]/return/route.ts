@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getItemById, updateItem } from '@/lib/store';
 import { matchBuyers } from '@/lib/matching';
 import { ReturnHold, Assessment } from '@/lib/types';
+import { notifyMatchingBuyers } from '@/lib/notifications';
 
 export async function POST(
   _request: NextRequest,
@@ -67,6 +68,10 @@ export async function POST(
   };
 
   updateItem(id, { returnHold, route, assessment: preliminaryAssessment });
+
+  // Notify nearby buyers who want this category
+  const openBoxPrice = Math.round(item.originalPrice * 0.9 / 10) * 10;
+  notifyMatchingBuyers(item, openBoxPrice);
 
   return NextResponse.json({
     success: true,

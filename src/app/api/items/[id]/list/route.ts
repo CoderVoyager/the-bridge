@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getItemById, updateItem } from '@/lib/store';
 import { awardGreenCredits } from '@/lib/green';
+import { notifyMatchingBuyers } from '@/lib/notifications';
 
 export async function POST(
   request: NextRequest,
@@ -34,7 +35,7 @@ export async function POST(
     awardGreenCredits(
       item.ownerId,
       item.id,
-      'donate_item',
+      'donate',
       5, // ~5 kg CO₂ saved vs landfill
       `Donated ${item.title}`
     );
@@ -64,6 +65,10 @@ export async function POST(
     };
     updateItem(id, { route });
   }
+
+  // Notify matching buyers
+  const price = item.assessment?.price ?? item.originalPrice;
+  notifyMatchingBuyers(item, price);
 
   return NextResponse.json({ success: true, message: 'Item is now live on the marketplace!' });
 }

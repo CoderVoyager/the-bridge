@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { RoleProvider } from "@/components/RoleContext";
 import RoleSwitcher from "@/components/RoleSwitcher";
+import NotificationBell from "@/components/NotificationBell";
 
 export const metadata: Metadata = {
   title: "The Bridge — Give It a Second Life",
@@ -27,6 +28,7 @@ export default function RootLayout({
               </a>
               <div className="flex items-center gap-3">
                 <RoleSwitcher />
+                <NotificationBell />
                 <a
                   href="/dashboard"
                   className="rounded-lg border border-neutral-800 px-2.5 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:border-amber-500/30 hover:text-[var(--text-primary)]"
