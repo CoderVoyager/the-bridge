@@ -3,6 +3,7 @@ import "./globals.css";
 import { RoleProvider } from "@/components/RoleContext";
 import RoleSwitcher from "@/components/RoleSwitcher";
 import NotificationBell from "@/components/NotificationBell";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "The Bridge — Give It a Second Life",
@@ -39,6 +40,7 @@ export default function RootLayout({
             </div>
           </header>
           <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+          <Analytics />
         </RoleProvider>
       </body>
     </html>
